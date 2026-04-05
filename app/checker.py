@@ -45,6 +45,38 @@ FLU_DX = {"j111","j111-1","j09","j10","j11"}
 ANTIBIOTICS = {"aug2","aug","cefa","clari","clari2","cipro","levo","levo250",
                "augsy","clarisy","cefasy","3cefa","3cefasy","3cefaiv","ampiiv","linco"}
 
+# ── 약+약 삭감 (동시 보험 불가, 하나는 f12) ──
+# co+cosy 같은 성분
+# atock+pat 같은 분류
+# ty+semi / NSAID+set / ty+set
+NSAID_CODES = {"loxo","dexi","dexisy","bru","d"}
+AAP_CODES = {"ty","ty325","tykid","semi","set"}
+
+# 소화제 (2종 이상 삭감)
+PROKINETICS = {"macpo","dom","trime","levo","mosa","trimesy"}
+
+# ── 상병+약 삭감 (해당 상병으로는 보험 불가 → 추가 상병 필요) ──
+# dexa/pd + 감기(j00)/인후두염(j060)/편도염(j0390)/기관지염(j209) → 삭감
+# → 후두염(j040)/비염(j303)/피부염(l309)에만 보험
+DEXA_PD_BANNED_DX = {"j00","j060","j0390","j209"}
+DEXA_PD_OK_DX = {"j040","j303","l309","l500"}
+
+# 비염(j303)에 항생제/NSAID 삭감
+RHINITIS_DX = {"j303"}
+
+# kina는 J코드(호흡기) 아니면 삭감
+KINA_REQUIRED_PREFIX = "j"
+
+# 바이럴 상병 (항생제 삭감)
+VIRAL_DX = {"j111","j111-1","b084","b08","b01","b019"}  # 인플루엔자, 수족구, 수두
+
+# 위염 상병
+GASTRITIS_DX = {"k297","k29","k290","k295","k296"}
+# 장염 상병
+ENTERITIS_DX = {"a09","a090","a099","k529"}
+# 식도염 상병
+ESOPHAGITIS_DX = {"k210","k219","k21"}
+
 
 def _dx_startswith(dx_set: set, prefix: str) -> bool:
     return any(c.startswith(prefix) for c in dx_set)
@@ -162,6 +194,219 @@ def run_check(dx: List[str], orders: List[str], symptoms: str, patient_type: str
                 "message": "loxo + 호흡기 상병만 있음 → 삭감",
                 "sub": "m545(아래허리통증) 등 근골격계 상병 추가 필요",
                 "source": "인수인계_2026년3월.md"
+            })
+
+    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    # [B2] 약+약 삭감 (동시 보험 불가 → 하나는 f12)
+    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    # B2-1. co + cosy 동시 보험 불가 (같은 성분)
+    if {"co","cosy"} <= order_set:
+        results.append({
+            "level": "err",
+            "message": "co + cosy 동시 보험 불가 (같은 성분)",
+            "sub": "하나는 f12 비급여 처리",
+            "source": "네이버카페 — 감기쪽 약 2개_3개"
+        })
+
+    # B2-2. atock + pat 동시 보험 불가 (같은 분류)
+    atock_codes = {"atock","atock2"}
+    pat_codes = {"pat1","pat2","pat3"}
+    if (order_set & atock_codes) and (order_set & pat_codes):
+        results.append({
+            "level": "err",
+            "message": "atock + pat 동시 보험 불가 (같은 분류)",
+            "sub": "하나는 f12 비급여 처리",
+            "source": "네이버카페 — 감기쪽 약 2개_3개"
+        })
+
+    # B2-3. ty + semi 동시 보험 불가
+    if {"ty","semi"} <= order_set or {"ty325","semi"} <= order_set or {"tykid","semi"} <= order_set:
+        results.append({
+            "level": "err",
+            "message": "ty + semi 동시 보험 불가",
+            "sub": "하나는 f12 비급여 처리",
+            "source": "네이버카페 — 자주하는 지적질 모음"
+        })
+
+    # B2-4. NSAID + set 동시 보험 불가
+    if (order_set & NSAID_CODES) and "set" in order_set:
+        results.append({
+            "level": "err",
+            "message": f"NSAID + set 동시 보험 불가",
+            "sub": "하나는 f12 비급여 처리. ty+set도 삭감",
+            "source": "네이버카페 — 자주하는 지적질 모음"
+        })
+
+    # B2-5. d + tra 동시 보험 → tra를 trab로
+    if "d" in order_set and "tra" in order_set:
+        results.append({
+            "level": "err",
+            "message": "d(디클로페낙) + tra(트라마돌) 동시 보험 불가",
+            "sub": "tra → trab(비급여)로 변경 필수. 디클로페낙이 보험",
+            "source": "네이버카페 — 성인 발열시 처방"
+        })
+
+    # B2-6. 항생제 2종 동시 보험 불가
+    used_ab = order_set & ANTIBIOTICS
+    if len(used_ab) >= 2:
+        results.append({
+            "level": "err",
+            "message": f"항생제 2종 동시 보험 불가: {', '.join(sorted(used_ab))}",
+            "sub": "코멘트 달아도 삭감. 하나는 f12 비급여 처리",
+            "source": "네이버카페 — 항생제 2종 처방시 문의"
+        })
+
+    # B2-7. 소화제(prokinetics) 2종 이상 동시 보험 불가
+    used_prok = order_set & PROKINETICS
+    if len(used_prok) >= 2:
+        results.append({
+            "level": "err",
+            "message": f"소화제 {len(used_prok)}종 동시 보험 불가: {', '.join(sorted(used_prok))}",
+            "sub": "macpo/dom/trime/levo/mosa 중 1종만 보험",
+            "source": "네이버카페 — 자주하는 지적질 모음"
+        })
+
+    # B2-8. reba + cime 동시 보험 불가
+    if "reba" in order_set and "cime" in order_set:
+        results.append({
+            "level": "err",
+            "message": "reba + cime 동시 보험 불가",
+            "sub": "하나는 f12 비급여 처리",
+            "source": "네이버카페 — 자주하는 지적질 모음"
+        })
+
+    # B2-9. PPI bid/2T → 보험은 qd 1T만
+    if any(c in order_set for c in ["ppi","ppi2"]):
+        results.append({
+            "level": "warn",
+            "message": "PPI 보험은 QD 1T만 가능",
+            "sub": "BID 또는 2T 처방 시 삭감. 환자 원하는 PPI 낼 때 특히 주의",
+            "source": "네이버카페 — 자주하는 지적질 모음"
+        })
+
+    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    # [B3] 상병+약 삭감 (해당 상병으로 보험 불가 → 추가 상병 필요)
+    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    # B3-1. dexa/pd + 감기/인후두염/편도염/기관지염 → 삭감
+    if {"dexa","pd"} & order_set:
+        banned = dx_set & DEXA_PD_BANNED_DX
+        ok = dx_set & DEXA_PD_OK_DX
+        if banned and not ok:
+            results.append({
+                "level": "err",
+                "message": f"dexa/pd + {', '.join(sorted(banned))} → 삭감",
+                "sub": "j040(후두염), j303(비염), l309(피부염)에만 보험. 상병 추가 필요",
+                "source": "네이버카페 — 자주하는 지적질 모음"
+            })
+
+    # B3-2. 비염(j303)에 항생제/NSAID → 삭감
+    if dx_set & RHINITIS_DX:
+        rhinitis_ab = order_set & ANTIBIOTICS
+        rhinitis_nsaid = order_set & NSAID_CODES
+        if rhinitis_ab and not (dx_set - RHINITIS_DX):
+            results.append({
+                "level": "err",
+                "message": f"비염(j303) 단독 + 항생제({', '.join(sorted(rhinitis_ab))}) → 삭감",
+                "sub": "비염에는 ty, kina만 보험. 항생제 필요 시 다른 상병 추가",
+                "source": "네이버카페 — 자주하는 지적질 모음"
+            })
+        if rhinitis_nsaid and not (dx_set - RHINITIS_DX):
+            results.append({
+                "level": "err",
+                "message": f"비염(j303) 단독 + NSAID({', '.join(sorted(rhinitis_nsaid))}) → 삭감",
+                "sub": "비염에는 ty, kina만 보험. NSAID 필요 시 다른 상병 추가",
+                "source": "네이버카페 — 자주하는 지적질 모음"
+            })
+
+    # B3-3. kina → J코드(호흡기) 아니면 삭감
+    if "kina" in order_set:
+        has_j = any(c.startswith("j") for c in dx_set)
+        if dx_set and not has_j:
+            results.append({
+                "level": "err",
+                "message": "kina → J코드(호흡기 상병) 없으면 삭감",
+                "sub": "피부염, 중이염, 방광염 등에서 kina 삭감",
+                "source": "네이버카페 — 자주하는 지적질 모음"
+            })
+
+    # B3-4. 3cefa → j00(감기)에 삭감, j060 필요
+    if "3cefa" in order_set and "j00" in dx_set:
+        if not (dx_set & {"j060","j040","j0390","j0180","j209"}):
+            results.append({
+                "level": "err",
+                "message": "3cefa + j00(감기) → 삭감. j060(인후두염)으로 변경",
+                "sub": "3cefa 효능효과에 비인두염(j00) 없음",
+                "source": "네이버카페 — 자주하는 지적질 모음"
+            })
+
+    # B3-5. 위염에 tra/ty 삭감
+    if dx_set & GASTRITIS_DX:
+        if "tra" in order_set and not (dx_set - GASTRITIS_DX - {"k21","k210","k219"}):
+            results.append({
+                "level": "err",
+                "message": "위염 상병 + tra(트라마돌) → 삭감",
+                "sub": "위염 메인일 때 tra 삭감. 다른 메인 상병(감기 등) 먼저 잡기",
+                "source": "네이버카페 — 자주하는 지적질 모음"
+            })
+        if ({"ty","ty325","tykid"} & order_set) and not (dx_set - GASTRITIS_DX):
+            results.append({
+                "level": "err",
+                "message": "위염 상병 + ty → 삭감",
+                "sub": "위염 단독일 때 ty 삭감",
+                "source": "네이버카페 — 자주하는 지적질 모음"
+            })
+
+    # B3-6. 장염에 tra 삭감 (bus는 가능)
+    if dx_set & ENTERITIS_DX:
+        if "tra" in order_set and not (dx_set - ENTERITIS_DX):
+            results.append({
+                "level": "err",
+                "message": "장염 상병 + tra(트라마돌) → 삭감",
+                "sub": "복통에는 bus(부스코판) 사용. tra 필요 시 두통 등 상병 추가",
+                "source": "네이버카페 — 자주하는 지적질 모음"
+            })
+
+    # B3-7. 바이럴 상병(인플루엔자/수족구/수두)에 항생제 → 삭감
+    if dx_set & VIRAL_DX or _has_flu_dx(dx_set):
+        viral_ab = order_set & ANTIBIOTICS
+        if viral_ab and not (dx_set - VIRAL_DX - FLU_DX):
+            results.append({
+                "level": "err",
+                "message": f"바이럴 상병 + 항생제({', '.join(sorted(viral_ab))}) → 삭감",
+                "sub": "인플루엔자/수족구/수두 등에 항생제 보험 불가. 세균감염 의심 시 상병 추가",
+                "source": "네이버카페 — 자주하는 지적질 모음"
+            })
+
+    # B3-8. 식도염에 reba → 삭감
+    if dx_set & ESOPHAGITIS_DX and "reba" in order_set:
+        results.append({
+            "level": "err",
+            "message": "식도염 + reba(무코란) → 삭감",
+            "sub": "reba는 위염에만 보험. 식도염에는 al 사용 가능. 위염 상병 삭제하지 마세요",
+            "source": "네이버카페 — 자주하는 지적질 모음"
+        })
+
+    # B3-9. 위염/장염에 kina → 삭감
+    if (dx_set & GASTRITIS_DX or dx_set & ENTERITIS_DX) and "kina" in order_set:
+        if not any(c.startswith("j") for c in dx_set):
+            results.append({
+                "level": "err",
+                "message": "위염/장염 + kina → 삭감",
+                "sub": "kina는 J코드(호흡기) 상병 필요",
+                "source": "네이버카페 — 자주하는 지적질 모음"
+            })
+
+    # B3-10. w,x,y,z 상병 공단 청구 시 삭감
+    if dx and len(dx) > 0:
+        wxyz = [c for c in dx if c.lower().strip()[0:1] in {"w","x","y","z"}]
+        if wxyz:
+            results.append({
+                "level": "warn",
+                "message": f"w/x/y/z 상병({', '.join(wxyz)}) → 공단 청구 시 삭감",
+                "sub": "비청구 환자는 코드 불필요. 청구 환자에 잡지 마세요",
+                "source": "네이버카페 — 자주하는 지적질 모음"
             })
 
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
