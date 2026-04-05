@@ -790,6 +790,91 @@ def run_check(dx: List[str], orders: List[str], symptoms: str, patient_type: str
             "source": "인수인계_2026년3월.md"
         })
 
+    # E-26. dexa + 당뇨(E10~E14) 금기
+    dm_dx = {c for c in dx_set if c.startswith("e10") or c.startswith("e11") or c.startswith("e14")}
+    if dm_dx and "dexa" in order_set:
+        results.append({
+            "level": "err",
+            "message": "dexa(덱사메타손) + 당뇨 상병 → 금기",
+            "sub": "DM 환자 스테로이드 사용 시 혈당 상승 위험",
+            "source": "인수인계_2026년3월.md"
+        })
+
+    # E-27. d(디클로페낙) 처방 시 자동입력 기타근통 삭제 금지 안내
+    if "d" in order_set:
+        results.append({
+            "level": "info",
+            "message": "d(디클로페낙) → 자동입력 '기타 근통' 코드 삭제 금지",
+            "sub": "연결코드로 m79108 자동 입력됨. 특별한 경우 아니면 지우지 말 것",
+            "source": "인수인계_2026년3월.md"
+        })
+
+    # E-28. 12세 이상 소아약(시럽/가루) 보험 안 됨
+    PED_DRUG_CODES = {"augsy","cefasy","clarisy","3cefasy","typow","tysy","dropsy",
+                      "ac2","suda2","dexisy","cetisy","tamisy","ambsy","umk","lukasy"}
+    if patient_type != "소아":
+        used_ped = order_set & PED_DRUG_CODES
+        if used_ped:
+            results.append({
+                "level": "warn",
+                "message": f"소아약({', '.join(sorted(used_ped))}) → 12세 이상 보험 안 됨",
+                "sub": "성인약 처방 후 용법에 <pow> 입력하면 갈아서 복용 가능",
+                "source": "네이버카페 — 자주하는 지적질 모음"
+            })
+
+    # E-29. suda2 + cetisy/uxsy 병용 주의 (pheniramine 중복)
+    if "suda2" in order_set and ({"cetisy","uxsy"} & order_set):
+        results.append({
+            "level": "warn",
+            "message": "suda2 + cetisy/uxsy 병용 주의",
+            "sub": "suda2에 pheniramine 포함 → 항히스타민 성분 중복",
+            "source": "인수인계_2026년3월.md"
+        })
+
+    # E-30. ephed(리노에바스텔) 최대 10일
+    if "ephed" in order_set:
+        results.append({
+            "level": "warn",
+            "message": "ephed(리노에바스텔) → 최대 10일까지만",
+            "sub": "suda 용량 높아 부작용 주의",
+            "source": "인수인계_2026년3월.md"
+        })
+
+    # E-31. luka 천식 처방 시 특정내역 변경 필요
+    if any(c in order_set for c in ["luka10","luka4","luka5","lukasy"]) and (dx_set & {"j459","j459-1","j46"}):
+        results.append({
+            "level": "info",
+            "message": "luka + 천식 → 특정내역 변경 필요",
+            "sub": "'타 천식 약제로 증상조절이 되지 않는 2단계 이상의 천식'으로 수정",
+            "source": "인수인계_2026년3월.md"
+        })
+
+    # E-32. 복통에 tra 삭감 → bus 사용
+    if "tra" in order_set and not dx_set:
+        # 이미 E-5에서 항생제 상병없음 체크하므로 여기선 패스
+        pass
+
+    # E-33. 향정신성의약품 중복 처방 불가 (zol + 식욕억제제 등)
+    PSYCHOTROPIC = {"zol","스틸녹스","디에타민","큐시미아"}
+    used_psycho = order_set & PSYCHOTROPIC
+    if len(used_psycho) >= 2:
+        results.append({
+            "level": "err",
+            "message": "향정신성의약품 중복 처방 불가",
+            "sub": f"사용 중: {', '.join(sorted(used_psycho))}. 수면제+식욕억제제 등 절대 금기",
+            "source": "인수인계_2026년3월.md"
+        })
+
+    # E-34. mosa → r11(구역) 또는 k30(소화불량) 연결코드 필요
+    if "mosa" in order_set and dx_set:
+        if not (dx_set & {"r11","k30","k58","k580","k581","k589"}):
+            results.append({
+                "level": "warn",
+                "message": "mosa → r11(구역) 또는 k30(소화불량) 연결코드 필요",
+                "sub": "",
+                "source": "인수인계_2026년3월.md"
+            })
+
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     if not results:
         results.append({
