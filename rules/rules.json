@@ -1,0 +1,246 @@
+{
+  "version": "0.1",
+  "source": "노션 인수인계 + 인수인계_2026년3월.docx",
+  "rules": [
+    {
+      "id": "loxo_resp",
+      "name": "loxo + 호흡기 상병",
+      "trigger_orders": [
+        "loxo"
+      ],
+      "trigger_dx_pattern": "호흡기",
+      "trigger_dx_codes": [
+        "j00",
+        "j040",
+        "j060",
+        "j0180",
+        "j0390",
+        "j209",
+        "j189",
+        "j060",
+        "j303",
+        "j22"
+      ],
+      "missing_dx": [
+        "m545",
+        "m542",
+        "m79"
+      ],
+      "level": "err",
+      "message": "loxo(loxoprofen) + 호흡기 상병만 있음 → 삭감 대상",
+      "sub": "m545(아래허리통증) 등 근골격계 상병 추가 필요",
+      "source": "인수인계_2026년3월.docx"
+    },
+    {
+      "id": "cipro_first_cystitis",
+      "name": "cipro 방광염 1차",
+      "trigger_orders": [
+        "cipro"
+      ],
+      "required_dx": [
+        "n300"
+      ],
+      "missing_dx": [
+        "n12-3",
+        "n12-2"
+      ],
+      "level": "err",
+      "message": "cipro를 방광염 1차로 사용 시 n12-3 신우신염 NOS 상병 추가 필요",
+      "sub": "방광염(n300) 단독으로 cipro 1차 처방은 보험 문제",
+      "source": "급성 방광염 acute cystitis.md"
+    },
+    {
+      "id": "levo_high_dose",
+      "name": "levofloxacin 고용량",
+      "trigger_orders": [
+        "levo500",
+        "크라비트500",
+        "levofloxacin500"
+      ],
+      "level": "err",
+      "message": "levofloxacin 500~750mg QD → 삭감 대상",
+      "sub": "크라비트는 250mg QD x10d 사용",
+      "source": "신우신염 APN acute pyelonephritis.md"
+    },
+    {
+      "id": "apn_diclofenac_code",
+      "name": "신우신염 + 디클로페낙",
+      "trigger_orders": [
+        "d"
+      ],
+      "required_dx": [
+        "n12-3",
+        "n12-2"
+      ],
+      "level": "warn",
+      "message": "신우신염 + 디클로페낙: 자동 입력되는 기타근통 코드 삭제 필요",
+      "sub": "오더 연결코드 m79108 기타 근통 삭제",
+      "source": "신우신염 APN acute pyelonephritis.md"
+    },
+    {
+      "id": "fosfomycin_dosing",
+      "name": "모누롤산 처방",
+      "trigger_orders": [
+        "mono",
+        "모누롤산",
+        "fosfomycin"
+      ],
+      "level": "warn",
+      "message": "모누롤산(fosfomycin): 반드시 1,1,1로 처방",
+      "sub": "딱 한 번 복용하는 약. 단순 UTI 아닌 경우 금기",
+      "source": "급성 방광염 acute cystitis.md"
+    },
+    {
+      "id": "ped_quinolone",
+      "name": "소아 quinolone",
+      "trigger_orders": [
+        "cipro",
+        "levo"
+      ],
+      "patient_type": "소아",
+      "level": "err",
+      "message": "소아에 quinolone(cipro/levofloxacin) 금기",
+      "sub": "소아 UTI 1차: augsy 또는 cefasy",
+      "source": "소아 UTI.md"
+    },
+    {
+      "id": "cd_order",
+      "name": "cd 상병 순서",
+      "trigger_orders": [
+        "cd"
+      ],
+      "level": "warn",
+      "message": "cd(만성질환관리료) 관련 상병이 주상병 최상위에 있어야 함",
+      "sub": "고혈압/당뇨 등 만성질환 상병을 상병 목록 맨 위로",
+      "source": "인수인계_2026년3월.docx"
+    },
+    {
+      "id": "inj_2types",
+      "name": "주사 2종 이상",
+      "level": "warn",
+      "message": "주사제 2종 이상 사용 시 추가분은 비급여(-b) 코드 사용",
+      "sub": "ex) genta → gentab, dexa → dexab (디클로페낙 제외)",
+      "source": "인수인계_2026년3월.docx"
+    },
+    {
+      "id": "adult_antitussive",
+      "name": "성인 진해거담제 2종 초과",
+      "level": "err",
+      "message": "성인 진해거담제 2종까지만 보험 인정",
+      "sub": "co/cosy/drop/erdo/ac 중 2종 초과 → 삭감. 같은 작용 약 중복도 삭감",
+      "source": "성인 URI.md"
+    },
+    {
+      "id": "ped_antitussive",
+      "name": "소아 진해거담제 초과",
+      "patient_type": "소아",
+      "level": "err",
+      "message": "소아 진해거담제: 6세미만 3종, 6세이상 2종까지 보험",
+      "sub": "dropsy/umk/ac2 조합 확인",
+      "source": "소아 URI(만12세 미만).md"
+    },
+    {
+      "id": "umk_dose",
+      "name": "umk(움카민) 소아 용량",
+      "trigger_orders": [
+        "umk"
+      ],
+      "patient_type": "소아",
+      "level": "warn",
+      "message": "umk(움카민) 소아 용량: 나이별 고정 — 벗어나면 삭감",
+      "sub": "1~6세미만: 9mL TID / 6~12세미만: 18mL TID",
+      "source": "소아 URI(만12세 미만).md"
+    },
+    {
+      "id": "glia8_age",
+      "name": "글리아티린 60세 미만",
+      "trigger_orders": [
+        "glia8"
+      ],
+      "level": "err",
+      "message": "글리아티린(glia8) 60세 미만 처방 금지",
+      "sub": "반드시 전화로 나이 확인 후 처방",
+      "source": "인수인계_2026년3월.docx"
+    },
+    {
+      "id": "chronic_revisit",
+      "name": "만성질환 재진 구분",
+      "level": "info",
+      "message": "만성질환 재진: 의사랑 자동인식 안됨 → 수동 변경 필요",
+      "sub": "마지막 투약 종료일 이후 90일까지 재진 (30일분 처방 시 마지막 내원일+120일)",
+      "source": "인수인계_2026년3월.docx"
+    },
+    {
+      "id": "dige_banned",
+      "name": "dige(ranitidine) 사용 금지",
+      "trigger_orders": ["dige","ranitidine"],
+      "level": "err",
+      "message": "dige(ranitidine) 사용 불가 — 시장 철수 성분",
+      "sub": "대체: reba(무코란) 또는 ppiiv(판타졸주사)",
+      "source": "인수인계_2026년3월.docx"
+    },
+    {
+      "id": "clopidogrel_dx",
+      "name": "clopidogrel 필수 상병",
+      "trigger_orders": ["clopi","clopidogrel","플라빅스"],
+      "missing_dx": ["i252","i638"],
+      "level": "err",
+      "message": "clopidogrel(플라빅스) → i252 또는 i638 등 필수 상병 누락",
+      "sub": "단순 고혈압만으로 비보험. 만성허혈성심질환/뇌경색 상병 추가",
+      "source": "항혈소판제.md"
+    },
+    {
+      "id": "dyslipidemia_cd",
+      "name": "이상지질혈증 cd 비대상",
+      "trigger_orders": ["cd"],
+      "level": "err",
+      "message": "이상지질혈증 단독 → 만성질환관리료(cd) 청구 불가",
+      "sub": "고혈압/당뇨 상병이 함께 있어야 cd 청구 가능",
+      "source": "고지혈증 이상지질혈증 dyslipidemia.md"
+    },
+    {
+      "id": "bisoprolol_hf",
+      "name": "bisoprolol 2.5mg 심부전 상병",
+      "trigger_orders": ["bisoprolol","콩코르2.5"],
+      "missing_dx": ["i50","i500","i501","i509"],
+      "level": "warn",
+      "message": "bisoprolol 2.5mg → 심부전(I50) 상병 추가 확인",
+      "sub": "심부전 상병 없이 2.5mg은 보험 문제 가능",
+      "source": "고혈압 HTN hypertension.md"
+    },
+    {
+      "id": "migraine_multi_analgesic",
+      "name": "편두통 진통제 중복",
+      "trigger_orders": ["크래밍","cramming","ergot"],
+      "level": "err",
+      "message": "편두통 급성기 크래밍 + NSAIDs/ty/semi 중 1가지만 가능",
+      "sub": "2종부터 삭감. 크래밍 단독 또는 +1종까지만 보험",
+      "source": "편두통 migraine.md"
+    },
+    {
+      "id": "dm_pseudoephedrine",
+      "name": "당뇨 + pseudoephedrine 금기",
+      "trigger_orders": ["pseudo","pseudoephedrine"],
+      "level": "err",
+      "message": "당뇨 환자에 pseudoephedrine 절대 금기",
+      "sub": "혈당 상승 + 혈압 상승 위험. 대체제 사용",
+      "source": "당뇨 DM diabetes.md"
+    },
+    {
+      "id": "antiplatelet_2plus",
+      "name": "항혈소판제 2종 이상",
+      "level": "warn",
+      "message": "항혈소판제 2종 이상 동시 처방 → 삭감 주의",
+      "sub": "보험 인정 조건 확인 필요",
+      "source": "항혈소판제.md"
+    },
+    {
+      "id": "z_code_primary",
+      "name": "배제코드 주상병",
+      "level": "warn",
+      "message": "주상병이 배제코드(Z코드) → 주상병으로 부적절",
+      "sub": "배제된 상병(Z코드)은 주상병 위치에 올 수 없음. 순서 변경 필요",
+      "source": "인수인계_2026년3월.docx"
+    }
+  ]
+}

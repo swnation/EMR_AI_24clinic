@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+rapidfuzz
+openpyxl
+# --- Windows 전용 (로컬 OCR용, 온라인 테스트 시 불필요) ---
+# pyautogui
+# pillow
+# keyboard
+# pywin32

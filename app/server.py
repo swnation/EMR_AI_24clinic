@@ -1,0 +1,78 @@
+from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+from pydantic import BaseModel
+from typing import List, Optional
+import json, os
+
+from app.checker import run_check
+from app.templates import get_all_templates, get_template_by_id, get_templates_by_category
+
+app = FastAPI()
+
+# 프론트엔드 정적 파일
+app.mount("/static", StaticFiles(directory="frontend"), name="static")
+
+@app.get("/")
+def root():
+    return FileResponse("frontend/index.html")
+
+class ScanRequest(BaseModel):
+    dx: List[str] = []        # 상병코드 목록 ["j0390", "k297"]
+    orders: List[str] = []    # 오더코드 목록 ["aug2", "dexi", "loxo"]
+    symptoms: str = ""        # 증상 텍스트
+    patient_type: str = "성인"  # "성인" | "소아"
+
+class CheckResult(BaseModel):
+    level: str   # err | warn | info | ok
+    message: str
+    sub: str = ""
+    source: str = ""
+
+@app.post("/check", response_model=List[CheckResult])
+def check(req: ScanRequest):
+    results = run_check(req.dx, req.orders, req.symptoms, req.patient_type)
+    return results
+
+# ── 템플릿 API ──
+
+@app.get("/templates")
+def templates(category: Optional[str] = None):
+    """템플릿 목록 반환. ?category=진단서 로 필터 가능"""
+    if category:
+        return get_templates_by_category(category)
+    return get_all_templates()
+
+@app.get("/templates/{template_id}")
+def template_detail(template_id: str):
+    """특정 템플릿 반환"""
+    t = get_template_by_id(template_id)
+    if t:
+        return t
+    return {"error": "not found"}
+
+# ── knowledge API ──
+
+@app.get("/knowledge/{filename}")
+def get_knowledge(filename: str):
+    """노션 파일 내용 반환"""
+    path = f"knowledge/{filename}"
+    if os.path.exists(path):
+        with open(path, encoding="utf-8") as f:
+            return {"content": f.read()}
+    return {"content": ""}
+
+@app.get("/knowledge")
+def list_knowledge():
+    """knowledge 파일 목록"""
+    files = []
+    kdir = "knowledge"
+    if os.path.isdir(kdir):
+        for f in sorted(os.listdir(kdir)):
+            if f.endswith(".md"):
+                files.append(f)
+    return {"files": files}
+
+@app.get("/health")
+def health():
+    return {"status": "ok"}
