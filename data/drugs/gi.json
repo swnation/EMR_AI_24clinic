@@ -1,0 +1,70 @@
+{
+  "_description": "소화기약 - PPI, H2RA, 위장관운동촉진제, 정장제, 하제, 스테로이드 등",
+
+  "PPI": {
+    "_note": "위염/식도염 상병 필요. 4주 초과시 진단명 확인",
+    "ppi":   {"name": "에스오엠정20mg", "generic": "esomeprazole", "form": "po", "age": "성인", "insurance_price": 649, "claim_code": "669906390"},
+    "ppi2":  {"name": "에스오엠정40mg", "generic": "esomeprazole 40mg", "form": "po", "age": "성인", "insurance_price": 1078, "claim_code": "669906410"},
+    "pcab":  {"name": "위캡정40mg", "generic": "tegoprazan(P-CAB)", "form": "po", "age": "성인", "insurance_price": 921, "claim_code": "694003750"},
+    "dppi":  {"name": "덱실란트캡슐30mg", "generic": "dexlansoprazole", "form": "po", "age": "성인", "insurance_price": 581, "claim_code": "696300170"}
+  },
+
+  "H2RA": {
+    "_note": "reba(rebamipide)는 H2RA 아님, 위점막보호제. famo/cime가 H2RA",
+    "famo":  {"name": "파밀란정20mg", "generic": "famotidine", "form": "po", "age": "성인", "insurance_price": 161, "claim_code": "669907870"},
+    "cime":  {"name": "시메티딘정200mg", "generic": "cimetidine", "form": "po", "age": "성인", "insurance_price": 69, "claim_code": "670103650"}
+  },
+
+  "위점막보호제": {
+    "reba":  {"name": "무코란정", "generic": "rebamipide", "form": "po", "age": "성인", "insurance_price": 103, "claim_code": "669901570",
+              "note": "dige(ranitidine) 사용불가 → reba로 대체"}
+  },
+
+  "위장관운동촉진제": {
+    "_note": "prokinetics 2종 이상 동시 삭감",
+    "macpo":   {"name": "맥페란정", "generic": "metoclopramide", "form": "po", "age": "성인", "insurance_price": 49, "claim_code": "642701320"},
+    "dom":     {"name": "디엠정", "generic": "domperidone", "form": "po", "age": "성인", "insurance_price": 39, "claim_code": "649100110"},
+    "dom2":    {"name": "돔페리돈과립", "generic": "domperidone", "form": "po_granule", "age": "소아", "insurance_price": 0, "claim_code": "645700491"},
+    "trime":   {"name": "레큐틴정", "generic": "trimebutine", "form": "po", "age": "성인", "insurance_price": 79, "claim_code": "649100170"},
+    "trimesy": {"name": "포리부틴드라이시럽", "generic": "trimebutine", "form": "po_liquid", "age": "소아", "insurance_price": 15, "claim_code": "643901621", "unit": "mL"},
+    "mosa":    {"name": "모사틴정", "generic": "mosapride", "form": "po", "age": "성인", "insurance_price": 103, "claim_code": "670103410"},
+    "levot":   {"name": "스마틴정", "generic": "levosulpiride", "form": "po", "age": "성인", "insurance_price": 119, "claim_code": "649100470"}
+  },
+
+  "제산제_하제": {
+    "mag":    {"name": "마그밀정", "generic": "magnesium hydroxide", "form": "po", "age": "성인", "insurance_price": 23, "claim_code": "653700240"},
+    "dupha":  {"name": "듀락칸시럽", "generic": "lactulose", "form": "po_liquid", "age": "all", "insurance_price": 10, "claim_code": "644913503", "unit": "mL"}
+  },
+
+  "정장제": {
+    "kk":     {"name": "메디락디에스캡슐", "generic": "Bacillus subtilis+Streptococcus faecium", "form": "po", "age": "성인", "insurance_price": 96, "claim_code": "643500900"},
+    "lacto":  {"name": "락시러스캡슐", "generic": "Lactobacillus", "form": "po", "age": "성인", "insurance_price": 127, "claim_code": "649102630"},
+    "lacto2": {"name": "바실페디산", "generic": "Bacillus subtilis", "form": "po_granule", "age": "소아", "insurance_price": 151, "claim_code": "645702681"}
+  },
+
+  "소아_장염": {
+    "sme":    {"name": "다이톱현탁액", "generic": "smectite", "form": "po_liquid", "age": "소아", "insurance_price": 13, "claim_code": "645700122", "unit": "mL"},
+    "hidra":  {"name": "하이드라섹산10mg", "generic": "racecadotril", "form": "po_granule", "age": "소아", "insurance_price": 0, "claim_code": "644206380"}
+  },
+
+  "진토제": {
+    "bona":   {"name": "보나링에이정", "generic": "meclizine", "form": "po", "age": "성인", "insurance_price": 30, "claim_code": "641700560"}
+  },
+
+  "스테로이드_경구": {
+    "_note": "pd는 다용도(천식,알레르기,통증 등). GI 카테고리에 포함하지만 전신약",
+    "pd":     {"name": "메프솔정4mg", "generic": "methylprednisolone", "form": "po", "age": "성인", "insurance_price": 83, "claim_code": "628900680"},
+    "soso":   {"name": "소론도정", "generic": "prednisolone", "form": "po", "age": "all", "insurance_price": 16, "claim_code": "642105020"}
+  },
+
+  "_prokinetics_conflict": {
+    "codes": ["macpo", "dom", "trime", "mosa", "levot"],
+    "rule": "위장관운동촉진제 2종 이상 동시 삭감",
+    "level": "ERR"
+  },
+
+  "_dige_banned": {
+    "note": "dige 코드(ranitidine 성분) 사용불가 → reba 또는 ppiiv로 대체",
+    "level": "ERR"
+  }
+}

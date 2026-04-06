@@ -1,0 +1,65 @@
+{
+  "_description": "진통소염제 - NSAIDs, AAP(아세트아미노펜 계열), 근이완제, 신경통약 등",
+
+  "NSAIDs": {
+    "_note": "loxo는 호흡기 상병만 있으면 삭감 → m545 등 근골격 상병 추가 필요. NSAID+set 삭감",
+    "loxo":   {"name": "록소프로펜정", "generic": "loxoprofen", "form": "po", "age": "성인", "insurance_price": 125, "claim_code": "669901120"},
+    "dexi":   {"name": "덱시부프로펜정", "generic": "dexibuprofen", "form": "po", "age": "성인", "insurance_price": 108, "claim_code": "669907820"},
+    "dexi4":  {"name": "덱시부정400mg", "generic": "dexibuprofen 400mg", "form": "po", "age": "성인", "insurance_price": 154, "claim_code": "670100100"},
+    "dexisy": {"name": "코코페디시럽", "generic": "dexibuprofen", "form": "po_liquid", "age": "소아", "insurance_price": 24, "claim_code": "645702251", "unit": "mL"},
+    "bru":    {"name": "부루펜정200mg", "generic": "ibuprofen", "form": "po", "age": "성인", "insurance_price": 34, "claim_code": "643900470"},
+    "dic":    {"name": "다이크로짇정", "generic": "diclofenac", "form": "po", "age": "성인", "insurance_price": 10, "claim_code": "642100160"},
+    "cereb":  {"name": "세레브렉스캡슐200mg", "generic": "celecoxib", "form": "po", "age": "성인", "insurance_price": 502, "claim_code": "073400280"},
+    "melox":  {"name": "멜리카캡슐", "generic": "meloxicam", "form": "po", "age": "성인", "insurance_price": 230, "claim_code": "670100440"}
+  },
+
+  "AAP": {
+    "_note": "아세트아미노펜 계열. ty+semi 삭감, ty+set 삭감, ty325+semi 삭감. semi+NSAID는 가능",
+    "ty":     {"name": "세토펜이알서방정", "generic": "acetaminophen SR", "form": "po", "age": "성인", "insurance_price": 70, "claim_code": "645700850"},
+    "ty325":  {"name": "세토펜정325mg", "generic": "acetaminophen", "form": "po", "age": "성인/소아", "insurance_price": 29, "claim_code": "645700870"},
+    "ty160":  {"name": "세토펜정160mg", "generic": "acetaminophen", "form": "po", "age": "소아", "insurance_price": 26, "claim_code": "645700860"},
+    "ty80":   {"name": "세토펜정80mg", "generic": "acetaminophen", "form": "po", "age": "소아", "insurance_price": 24, "claim_code": "645700880"},
+    "typow":  {"name": "세토펜건조시럽", "generic": "acetaminophen", "form": "po_granule", "age": "소아", "insurance_price": 115, "claim_code": "645702601"},
+    "tysy":   {"name": "세토펜현탁액", "generic": "acetaminophen", "form": "po_liquid", "age": "소아", "insurance_price": 26, "claim_code": "645700891", "unit": "mL"},
+    "semi":   {"name": "무파인세미정", "generic": "acetaminophen+tramadol", "form": "po", "age": "성인", "insurance_price": 107, "claim_code": "669904800"},
+    "set":    {"name": "무파인정", "generic": "acetaminophen+ibuprofen", "form": "po", "age": "성인", "insurance_price": 0, "claim_code": "669904810", "note": "비급여"}
+  },
+
+  "AAP_주사": {
+    "aapiv":  {"name": "파세타주", "generic": "acetaminophen IV", "form": "iv", "age": "성인", "insurance_price": 0, "claim_code": "648506590", "note": "비급여"},
+    "tyiv":   {"name": "아세트아미노펜주1g", "generic": "acetaminophen IV", "form": "iv", "age": "성인", "insurance_price": 0, "claim_code": "681100401", "note": "비급여"}
+  },
+
+  "근이완제": {
+    "epe":     {"name": "에페리손정", "generic": "eperisone", "form": "po", "age": "성인", "insurance_price": 98, "claim_code": "670100990"},
+    "tal":     {"name": "휴말겐정", "generic": "tizanidine", "form": "po", "age": "성인", "insurance_price": 148, "claim_code": "649102000"},
+    "bangpung": {"name": "캠벨정", "generic": "chlorzoxazone", "form": "po", "age": "성인", "insurance_price": 0, "claim_code": null}
+  },
+
+  "편두통": {
+    "_note": "편두통(G439): cramming + NSAIDs/ty/semi 중 1가지만. 2종부터 삭감",
+    "stab":    {"name": "스타브론정", "generic": "naratriptan", "form": "po", "age": "성인", "insurance_price": 153, "claim_code": "645400610"},
+    "caffe":   {"name": "카푸린에스정", "generic": "ergotamine+caffeine", "form": "po", "age": "성인", "insurance_price": null, "claim_code": null}
+  },
+
+  "신경통": {
+    "_note": "리리카는 신경과 처방 repeat만. gaba는 보험 인정 상병 확인 필요",
+    "ririca":  {"name": "리리카캡슐75mg", "generic": "pregabalin", "form": "po", "age": "성인", "insurance_price": 0, "claim_code": "648900240", "note": "비급여(1차기관)"},
+    "gaba1":   {"name": "가바펜틴캡슐100mg", "generic": "gabapentin", "form": "po", "age": "성인", "insurance_price": 198, "claim_code": "694000960"},
+    "gaba3":   {"name": "가바펜틴캡슐300mg", "generic": "gabapentin", "form": "po", "age": "성인", "insurance_price": 407, "claim_code": "694000140"}
+  },
+
+  "_conflicts": [
+    {"pair": ["ty", "semi"], "reason": "삭감 (AAP 중복)"},
+    {"pair": ["ty325", "semi"], "reason": "삭감 (AAP 중복)"},
+    {"pair": ["ty", "set"], "reason": "삭감 (AAP 중복)"},
+    {"pair": ["set", "_NSAIDs"], "reason": "삭감 (NSAID 중복). semi+NSAID는 가능"},
+    {"pair": ["_NSAIDs", "_NSAIDs"], "reason": "NSAID 2종 동시 삭감"}
+  ],
+
+  "_loxo_resp_rule": {
+    "trigger": "loxo가 있고 호흡기 상병(J코드)만 있을 때",
+    "action": "m545(요통), m542(경추통), m79(근통) 등 근골격 상병 추가 필요",
+    "level": "ERR"
+  }
+}

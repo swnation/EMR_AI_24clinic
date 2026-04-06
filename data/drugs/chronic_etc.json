@@ -1,0 +1,228 @@
+{
+  "_description": "만성질환약(고혈압/당뇨/고지혈증/골다공증) + 비뇨기 + 피부 + 안과 + 수면/신경 + 처치재료 + 기타",
+
+  "만성질환관리료": {
+    "cd": {"name": "만성질환관리료", "insurance_price": 2320, "note": "해당 만성질환 상병이 최상위에 있어야 함. 재진 수동변경 필요"}
+  },
+
+  "고혈압_CCB": {
+    "amlo":   {"name": "암로디핀정5mg", "generic": "amlodipine", "form": "po", "insurance_price": 312, "claim_code": "628900880"},
+    "sam":    {"name": "에스암로디핀정", "generic": "s-amlodipine", "form": "po", "insurance_price": 367},
+    "samlo":  {"name": "노브디핀정5mg", "generic": "s-amlodipine", "form": "po", "insurance_price": 365},
+    "nova":   {"name": "노바스크정5mg", "generic": "amlodipine", "form": "po", "insurance_price": 358},
+    "lerca":  {"name": "레카핀정", "generic": "lercanidipine", "form": "po", "insurance_price": 364}
+  },
+
+  "고혈압_ARB": {
+    "los1":   {"name": "로사르탄정50mg", "generic": "losartan", "form": "po", "insurance_price": 488},
+    "los2":   {"name": "로사르탄정100mg", "generic": "losartan", "form": "po", "insurance_price": 670},
+    "losa":   {"name": "로사벨정", "generic": "losartan", "form": "po", "insurance_price": 415},
+    "irbe":   {"name": "이베텔정", "generic": "irbesartan", "form": "po", "insurance_price": 415},
+    "cande":  {"name": "칸데사르탄+HCTZ", "generic": "candesartan/HCTZ", "form": "po", "insurance_price": 720},
+    "val40":  {"name": "발사르탄정40mg", "generic": "valsartan", "form": "po", "insurance_price": 350},
+    "val80":  {"name": "발사르탄정80mg", "generic": "valsartan", "form": "po", "insurance_price": 446},
+    "val160": {"name": "발사르탄정160mg", "generic": "valsartan", "form": "po", "insurance_price": 830},
+    "olme":   {"name": "올메사르탄정20mg", "generic": "olmesartan", "form": "po", "insurance_price": 354},
+    "olme10": {"name": "올메사르탄정10mg", "generic": "olmesartan", "form": "po", "insurance_price": 277},
+    "olme20": {"name": "올메사르탄정20mg", "generic": "olmesartan", "form": "po", "insurance_price": 354},
+    "olme+":  {"name": "올메사르탄+HCTZ", "generic": "olmesartan/HCTZ", "form": "po", "insurance_price": 354},
+    "tel1":   {"name": "텔미사르탄정40mg", "generic": "telmisartan", "form": "po", "insurance_price": 362},
+    "tel2":   {"name": "텔미사르탄정80mg", "generic": "telmisartan", "form": "po", "insurance_price": 487},
+    "enal":   {"name": "에날라프릴정", "generic": "enalapril(ACEi)", "form": "po", "insurance_price": 0}
+  },
+
+  "고혈압_ARB_복합": {
+    "_note": "ARB+CCB 또는 ARB+HCTZ 복합제",
+    "los+":     {"name": "로사르탄+HCTZ", "generic": "losartan/HCTZ", "form": "po", "insurance_price": 488},
+    "los+f":    {"name": "로사르탄+HCTZ 고용량", "generic": "losartan/HCTZ", "form": "po", "insurance_price": 640},
+    "los+pro":  {"name": "로사르탄+HCTZ+CCB", "generic": "losartan/HCTZ/amlodipine", "form": "po", "insurance_price": 397},
+    "losa+":    {"name": "로사르탄+HCTZ", "generic": "losartan/HCTZ", "form": "po", "insurance_price": 488},
+    "losa+f":   {"name": "로사르탄+HCTZ 고용량", "generic": "losartan/HCTZ", "form": "po", "insurance_price": 641},
+    "losa+pro": {"name": "로사르탄+HCTZ+CCB", "generic": "losartan/HCTZ/amlodipine", "form": "po", "insurance_price": 632},
+    "at1":      {"name": "텔미사르탄40+암로디핀5", "generic": "telmisartan/amlodipine", "form": "po", "insurance_price": 600},
+    "at2":      {"name": "텔미사르탄80+암로디핀5", "generic": "telmisartan/amlodipine", "form": "po", "insurance_price": 725},
+    "at3":      {"name": "텔미사르탄40+암로디핀10", "generic": "telmisartan/amlodipine", "form": "po", "insurance_price": 648},
+    "av1":      {"name": "발사르탄80+암로디핀5", "generic": "valsartan/amlodipine", "form": "po", "insurance_price": 805},
+    "av2":      {"name": "발사르탄160+암로디핀5", "generic": "valsartan/amlodipine", "form": "po", "insurance_price": 988},
+    "av3":      {"name": "발사르탄160+암로디핀10", "generic": "valsartan/amlodipine", "form": "po", "insurance_price": 1128},
+    "am5val80":  {"name": "암로디핀5+발사르탄80", "generic": "amlodipine/valsartan", "form": "po", "insurance_price": 805},
+    "am5val16":  {"name": "암로디핀5+발사르탄160", "generic": "amlodipine/valsartan", "form": "po", "insurance_price": 988},
+    "am10val":   {"name": "암로디핀10+발사르탄160", "generic": "amlodipine/valsartan", "form": "po", "insurance_price": 1128}
+  },
+
+  "고혈압_BB": {
+    "atenol":  {"name": "아테놀롤정50mg", "generic": "atenolol", "form": "po", "insurance_price": 186},
+    "carve":   {"name": "카르베딜롤정", "generic": "carvedilol", "form": "po", "insurance_price": 423}
+  },
+
+  "당뇨": {
+    "_note": "HbA1c 3개월 이내 중복 삭감",
+    "met":      {"name": "메트포르민서방정", "generic": "metformin XR", "form": "po", "insurance_price": 119},
+    "gli2":     {"name": "글리메피리드정2mg", "generic": "glimepiride", "form": "po", "insurance_price": 157},
+    "glimet":   {"name": "글리메피리드2+메트포르민500", "generic": "glimepiride/metformin", "form": "po", "insurance_price": 167},
+    "vog":      {"name": "보글리보스정0.3mg", "generic": "voglibose", "form": "po", "insurance_price": 0},
+    "piogl":    {"name": "피오글리타존정", "generic": "pioglitazone", "form": "po", "insurance_price": 551},
+    "janumet1": {"name": "시타글립틴50+메트포르민500 XR", "generic": "sitagliptin/metformin", "form": "po", "insurance_price": 381},
+    "janumet2": {"name": "시타글립틴50+메트포르민1000 XR", "generic": "sitagliptin/metformin", "form": "po", "insurance_price": 420},
+    "janumet3": {"name": "시타글립틴100+메트포르민1000 XR", "generic": "sitagliptin/metformin", "form": "po", "insurance_price": 572}
+  },
+
+  "고지혈증_스타틴": {
+    "_note": "이상지질혈증은 cd(만성질환관리료) 비대상",
+    "ato10":  {"name": "아토르바스타틴정10mg", "generic": "atorvastatin", "form": "po", "insurance_price": 663},
+    "ato20":  {"name": "아토르바스타틴정20mg", "generic": "atorvastatin", "form": "po", "insurance_price": 712},
+    "ato40":  {"name": "아토르바스타틴정40mg", "generic": "atorvastatin", "form": "po", "insurance_price": 1391},
+    "ato80":  {"name": "아토르바스타틴정80mg", "generic": "atorvastatin", "form": "po", "insurance_price": 0},
+    "rosu1":  {"name": "로수바스타틴10+에제티미브5", "generic": "rosuvastatin/ezetimibe", "form": "po", "insurance_price": 832},
+    "rosu2":  {"name": "로수바스타틴10+에제티미브10", "generic": "rosuvastatin/ezetimibe", "form": "po", "insurance_price": 1163},
+    "rosu3":  {"name": "로수바스타틴10+에제티미브20", "generic": "rosuvastatin/ezetimibe", "form": "po", "insurance_price": 1175},
+    "sim1":   {"name": "심바스타틴10+에제티미브10", "generic": "simvastatin/ezetimibe", "form": "po", "insurance_price": 666},
+    "sim2":   {"name": "심바스타틴20+에제티미브10", "generic": "simvastatin/ezetimibe", "form": "po", "insurance_price": 931},
+    "simva":  {"name": "심바스타틴정", "generic": "simvastatin", "form": "po", "insurance_price": 570},
+    "otpt":   {"name": "디디셀정", "generic": "rosuvastatin단독?", "form": "po", "insurance_price": 181}
+  },
+
+  "고지혈증_피브레이트": {
+    "feno":   {"name": "페노피브레이트정160mg", "generic": "fenofibrate", "form": "po", "insurance_price": 356},
+    "fib":    {"name": "페노피브레이트캡슐160mg", "generic": "fenofibrate", "form": "po", "insurance_price": 328}
+  },
+
+  "항혈소판제": {
+    "_note": "항혈소판제 2종 동시 삭감. clopi 단독 → i252 또는 i638 상병 필요",
+    "asp":    {"name": "아스피린장용정100mg", "generic": "aspirin", "form": "po", "insurance_price": 77},
+    "ast":    {"name": "아스피린캡슐100mg", "generic": "aspirin", "form": "po", "insurance_price": 0},
+    "clopi":  {"name": "클로피도그렐정", "generic": "clopidogrel", "form": "po", "insurance_price": 1164,
+               "required_dx_single": ["i252","i638"], "note": "단독 사용시 i252(만성허혈심질환) 또는 i638(뇌혈관질환) 상병 필요"}
+  },
+
+  "골다공증": {
+    "_note": "매 방문 명세서 필수. 1년 이내 검사 결과 필요",
+    "alen":    {"name": "알렌드로네이트정70mg", "generic": "alendronate", "form": "po", "insurance_price": 0},
+    "rise35":  {"name": "리세드로네이트정35mg", "generic": "risedronate", "form": "po", "insurance_price": 4308},
+    "rise":    {"name": "리세드로네이트정150mg", "generic": "risedronate", "form": "po", "insurance_price": 15932},
+    "rise150": {"name": "리세드로네이트정150mg", "generic": "risedronate", "form": "po", "insurance_price": 15932},
+    "iban":    {"name": "이반드로네이트정", "generic": "ibandronate", "form": "po", "insurance_price": 16407},
+    "von":     {"name": "본비바주(주사)", "generic": "ibandronate IV", "form": "iv", "insurance_price": 0},
+    "vonb":    {"name": "본비바주(-b)", "generic": "ibandronate IV", "form": "iv", "insurance_price": 0},
+    "vonbs":   {"name": "본비스정150mg", "generic": "ibandronate", "form": "po", "insurance_price": 16407},
+    "vonpo":   {"name": "본비바정150mg", "generic": "ibandronate", "form": "po", "insurance_price": 0}
+  },
+
+  "치매_뇌기능": {
+    "glia8":   {"name": "콜리아틴연질캡슐", "generic": "choline alfoscerate", "form": "po", "insurance_price": 432,
+                "age_rule": "60세 미만 금기. 60세 미만이면 전화확인 필수", "level": "WARN"},
+    "ginko":   {"name": "진코발정40mg", "generic": "ginkgo biloba", "form": "po", "insurance_price": 128},
+    "ginko2":  {"name": "진코발정80mg", "generic": "ginkgo biloba", "form": "po", "insurance_price": 0}
+  },
+
+  "빈혈_비타민": {
+    "ferro":   {"name": "훼로바유서방정", "generic": "ferrous sulfate", "form": "po", "insurance_price": 93},
+    "vitd":    {"name": "에버칼정", "generic": "cholecalciferol", "form": "po", "insurance_price": 81}
+  },
+
+  "수면_신경": {
+    "zol":      {"name": "스틸녹스정10mg", "generic": "zolpidem", "form": "po", "insurance_price": 173, "note": "처방일수 제한"},
+    "val":      {"name": "디아제팜정2mg", "generic": "diazepam", "form": "po", "insurance_price": 41},
+    "cons":     {"name": "뉴콘정", "generic": "clonazepam?", "form": "po", "insurance_price": 0},
+    "bermona":  {"name": "베르모나정1mg", "generic": "brotizolam", "form": "po", "insurance_price": 0},
+    "cercadin": {"name": "서카딘서방정2mg", "generic": "melatonin", "form": "po", "insurance_price": 0}
+  },
+
+  "비뇨기": {
+    "tamsul":  {"name": "탐스로신서방정0.2mg", "generic": "tamsulosin", "form": "po", "insurance_price": 440, "note": "전립선비대증"},
+    "tera":    {"name": "테라조신정2mg", "generic": "terazosin", "form": "po", "insurance_price": 356},
+    "propi":   {"name": "프로피베린정", "generic": "propiverine", "form": "po", "insurance_price": 615, "note": "과민성방광"},
+    "gugu":    {"name": "구구정10mg", "generic": "solifenacin", "form": "po", "insurance_price": 0},
+    "gugu1":   {"name": "구구정20mg", "generic": "solifenacin", "form": "po", "insurance_price": 0},
+    "gugu2":   {"name": "구구정5mg", "generic": "solifenacin", "form": "po", "insurance_price": 0}
+  },
+
+  "탈모_BPH": {
+    "fin":     {"name": "피나스테리드정5mg", "generic": "finasteride 5mg", "form": "po", "insurance_price": 622, "note": "BPH용"},
+    "fin1":    {"name": "피나스테리드정1mg", "generic": "finasteride 1mg", "form": "po", "insurance_price": 0, "note": "탈모용 비급여"},
+    "fin5":    {"name": "피나스테리드정5mg", "generic": "finasteride 5mg", "form": "po", "insurance_price": 622},
+    "fina1":   {"name": "피나스테리드정1mg", "generic": "finasteride 1mg", "form": "po", "insurance_price": 0}
+  },
+
+  "비만약": {
+    "_note": "모두 비급여",
+    "contrav":  {"name": "콘트라브서방정", "generic": "naltrexone/bupropion", "form": "po", "insurance_price": 0},
+    "phenter":  {"name": "펜터민정", "generic": "phentermine", "form": "po", "insurance_price": 0},
+    "orlistat": {"name": "오르리스타트캡슐", "generic": "orlistat", "form": "po", "insurance_price": 0}
+  },
+
+  "피임_응급피임": {
+    "clera":    {"name": "클래라정", "generic": "estradiol valerate/dienogest", "form": "po", "insurance_price": 0},
+    "clarajung": {"name": "클래라정", "generic": "estradiol valerate/dienogest", "form": "po", "insurance_price": 0},
+    "levono":   {"name": "이머트라정", "generic": "levonorgestrel", "form": "po", "insurance_price": 0},
+    "nolevo":   {"name": "노레보원정", "generic": "levonorgestrel 1.5mg", "form": "po", "insurance_price": 0, "note": "응급피임"},
+    "ellaone":  {"name": "엘라원정", "generic": "ulipristal", "form": "po", "insurance_price": 0, "note": "응급피임"}
+  },
+
+  "안과": {
+    "eye":      {"name": "히알루론산점안액0.1%", "generic": "hyaluronic acid", "form": "eye_drop", "insurance_price": 2078},
+    "eyemini":  {"name": "히알루론산프리점안액", "generic": "hyaluronic acid(1회용)", "form": "eye_drop", "insurance_price": 276},
+    "eyekid":   {"name": "토브라점안액", "generic": "tobramycin", "form": "eye_drop", "insurance_price": 4074},
+    "eyelevo":  {"name": "레보플록사신점안액", "generic": "levofloxacin", "form": "eye_drop", "insurance_price": 4044},
+    "eyeoint":  {"name": "오플록사신안연고", "generic": "ofloxacin", "form": "eye_oint", "insurance_price": 3489},
+    "eyeolo":   {"name": "올로파타딘점안액", "generic": "olopatadine", "form": "eye_drop", "insurance_price": 5235},
+    "eyeste":   {"name": "플루오로메톨론점안액", "generic": "fluorometholone", "form": "eye_drop", "insurance_price": 2080},
+    "opta":     {"name": "옵타젠트점안액", "generic": "naphazoline+diphenhydramine", "form": "eye_drop", "insurance_price": 0}
+  },
+
+  "이비인후과": {
+    "ear":     {"name": "타리비드이용액", "generic": "ofloxacin otic", "form": "ear_drop", "insurance_price": 0}
+  },
+
+  "피부_외용": {
+    "bac":        {"name": "무피로신연고", "generic": "mupirocin", "form": "external", "insurance_price": 1413},
+    "acyc":       {"name": "아시클로버연고", "generic": "acyclovir", "form": "external", "insurance_price": 3216},
+    "om":         {"name": "오메크린크림", "generic": "omoconazole", "form": "external", "insurance_price": 0},
+    "nail":       {"name": "아모롤핀네일라카", "generic": "amorolfine", "form": "external", "insurance_price": 23190},
+    "dermobate":  {"name": "더모베이트연고", "generic": "clobetasol", "form": "external", "insurance_price": 0},
+    "duac":       {"name": "듀악겔", "generic": "clindamycin+benzoyl peroxide", "form": "external", "insurance_price": 0},
+    "labenda":    {"name": "라벤다크림", "generic": "clotrimazole+betamethasone", "form": "external", "insurance_price": 990},
+    "nizo":       {"name": "니조랄액", "generic": "ketoconazole", "form": "external", "insurance_price": 0},
+    "albo":       {"name": "알보칠액", "generic": "policresulen", "form": "external", "insurance_price": 0}
+  },
+
+  "구강": {
+    "mouth":  {"name": "마우스겔액", "generic": "lidocaine+cetylpyridinium", "form": "oral_gel", "insurance_price": 0}
+  },
+
+  "마취_외용": {
+    "pdc":         {"name": "리도카인크림(소)", "generic": "lidocaine", "form": "external", "insurance_price": 1915},
+    "pdl":         {"name": "리도카인로션", "generic": "lidocaine", "form": "external", "insurance_price": 8137},
+    "stec":        {"name": "리도카인+스테로이드크림", "generic": "lidocaine+prednisolone", "form": "external", "insurance_price": 3220},
+    "stel":        {"name": "리도카인+스테로이드로션", "generic": "lidocaine+prednisolone", "form": "external", "insurance_price": 3376},
+    "lidomax450g": {"name": "리도멕스크림450g", "generic": "lidocaine", "form": "external", "insurance_price": 43199}
+  },
+
+  "처치재료": {
+    "form":    {"name": "메디폼", "note": "폼드레싱"},
+    "wd":      {"name": "운드드레싱", "note": "상처드레싱"},
+    "steri":   {"name": "스테리스트립", "note": "봉합테이프"},
+    "coban":   {"name": "코반1인치", "note": "자착붕대"},
+    "eb1":     {"name": "손가락망붕대"},
+    "eb2":     {"name": "탄력붕대5cm", "insurance_price": 313},
+    "eb4":     {"name": "탄력붕대10cm", "insurance_price": 508},
+    "splint1": {"name": "알루미늄손가락부목"},
+    "splint2": {"name": "완성형손가락부목"}
+  },
+
+  "기타": {
+    "antihbv":  {"name": "바라크루드정0.5mg", "generic": "entecavir", "form": "po", "insurance_price": 3001, "note": "B형간염 항바이러스"},
+    "thioctic": {"name": "티오시드정", "generic": "thioctic acid", "form": "po", "insurance_price": 199, "note": "당뇨성 신경병증"},
+    "opal":     {"name": "오팔몬정", "generic": "limaprost", "form": "po", "insurance_price": 314, "note": "말초혈관질환"},
+    "fluna":    {"name": "플루나리진캡슐", "generic": "flunarizine", "form": "po", "insurance_price": 154, "note": "어지러움/편두통예방"},
+    "nitro":    {"name": "니트로글리세린정0.6mg", "generic": "nitroglycerin", "form": "po", "insurance_price": 41, "note": "협심증"},
+    "sdm":      {"name": "사이클로스포린캡슐100mg", "generic": "cyclosporine", "form": "po", "insurance_price": 3767, "note": "면역억제"},
+    "magne":    {"name": "마그네슘정", "generic": "magnesium", "form": "po", "insurance_price": 0},
+    "mcpo":     {"name": "마이믹스정", "generic": "multivitamin", "form": "po", "insurance_price": 0},
+    "etb":      {"name": "에뜨비정", "generic": "etodolac?", "form": "po", "insurance_price": 0},
+    "bepo":     {"name": "베포린정", "generic": "bepotastine", "form": "po", "insurance_price": 0},
+    "mvix":     {"name": "수마트립탄필름50mg", "generic": "sumatriptan", "form": "po", "insurance_price": 0},
+    "mvix2":    {"name": "수마트립탄필름100mg", "generic": "sumatriptan", "form": "po", "insurance_price": 0},
+    "lanso":    {"name": "란소프라졸캡슐30mg", "generic": "lansoprazole", "form": "po", "insurance_price": 0}
+  }
+}
