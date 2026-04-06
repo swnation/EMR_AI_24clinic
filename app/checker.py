@@ -68,6 +68,22 @@ SME_OK_DX = {"a090","a084","a049","k581"}
 SME_BANNED_DX = {"k589"}
 TRA_BANNED_DX = {"a090","a084","a049","k58","k30","r11","k297","k29","k296"}
 
+# ── 추가 상수 (N 시리즈 룰) ──
+DM_DX_PREFIX = ("e10","e11","e12","e13","e14")
+SYRUP_CODES = {"cosy","cough","codsy","syna10","syna15","levt","pel"}
+DYSLIPIDEMIA_DX = {"e780","e781","e782","e783","e784","e785"}
+ANTIPLATELET_CODES = {"asp","ast","clopi"}
+ANTIHISTAMINE_CODES = {"ceti","cetisy","levoceti","fexo","olo","hls","phen","uxsy","keto","keto2","bepo"}
+NSAID_ANALGESIC_ALL = {"loxo","dexi","dexi4","dexisy","bru","dic","cereb","melox",
+                       "ty","ty325","ty160","ty80","semi","set","d"}
+NONINSURANCE_DRUG_CODES = {"contrav","phenter","orlistat","fin1","fina1",
+                           "palpal","palpal1","palpal2","sil","sil2","siladepil","sildenapil","silf",
+                           "cial10","cial20","tadaday",
+                           "nolevo","ellaone","levono"}
+DEMENTIA_DX_PREFIX = ("f00","f01","f02","f03","g30")
+BURN_FACE_HAND_CODES = {"bdres2"}
+HF_DX = {"i500","i501","i509","i50","i110","i130","i132"}
+
 
 def _dx_startswith(dx_set: set, prefix: str) -> bool:
     return any(c.startswith(prefix) for c in dx_set)
@@ -823,6 +839,173 @@ def _check_common(dx_set: set, order_set: set, dx: list, patient_type: str, resu
                 "source": "인수인계_2026년3월.md"
             })
 
+    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    # [N] 추가 룰 (knowledge 전수 스캔 결과)
+    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    dm_dx = {c for c in dx_set if c.startswith(DM_DX_PREFIX)}
+
+    # N1. 당뇨 + suda/suda2 (pseudoephedrine) → 금기
+    if dm_dx and ({"suda","suda2"} & order_set):
+        _append(results, "err",
+            "당뇨 + pseudoephedrine(suda/suda2) → 금기",
+            "혈당 상승 + 혈압 상승 위험. 콧물약 대체 필요",
+            "당뇨 Diabetes DM.md")
+
+    # N2. 당뇨 + 시럽제제 → 당류 포함 지양
+    if dm_dx and (order_set & SYRUP_CODES):
+        used = order_set & SYRUP_CODES
+        _append(results, "warn",
+            f"당뇨 + 시럽제제({', '.join(sorted(used))}) → 당류 포함, 알약 권장",
+            "시럽에 당류 함유. 가능하면 정제/캡슐로 대체",
+            "당뇨 Diabetes DM.md")
+
+    # N5. bisoprolol 2.5mg → 심부전 상병 필요
+    if "bisop25" in order_set or "콩코르2.5" in order_set:
+        if not (dx_set & HF_DX):
+            _append(results, "err",
+                "bisoprolol 2.5mg → 심부전 상병 필수",
+                "5mg은 고혈압 가능. 2.5mg은 심부전(I50) 상병 있어야 보험",
+                "인수인계_2026년3월.md")
+
+    # N7. 이상지질혈증 + cd → cd 비대상
+    if "cd" in order_set and (dx_set & DYSLIPIDEMIA_DX):
+        has_cd_eligible = any(c.startswith(("i10","i11","i12","i13","i15",  # 고혈압
+                                            "e10","e11","e12","e13","e14",  # 당뇨
+                                            "g43"))                         # 편두통
+                             for c in dx_set)
+        if not has_cd_eligible:
+            _append(results, "warn",
+                "이상지질혈증은 cd(만성질환관리료) 비대상",
+                "고혈압/당뇨/편두통 등 다른 cd 대상 상병이 있어야 cd 청구 가능",
+                "인수인계_2026년3월.md")
+
+    # N14. clopidogrel 단독(asp 없이) → i252/i638 필요
+    if "clopi" in order_set and not ({"asp","ast"} & order_set):
+        if not (dx_set & {"i252","i638"}):
+            _append(results, "err",
+                "clopidogrel 단독 → i252(만성허혈심질환) 또는 i638(뇌혈관질환) 상병 필요",
+                "aspirin 없이 clopi 단독 사용시 해당 상병 필수",
+                "항혈소판제.md")
+
+    # N9. fibrate + omega3 병용 → TG약 1제만
+    fibrate_codes = {"feno","fib"}
+    omega3_codes = {"오마코","om3"}  # 오마코 등 원내코드 확인 필요
+    if (order_set & fibrate_codes) and (order_set & omega3_codes):
+        _append(results, "err",
+            "fibrate + omega3 병용 → TG약 1제만 인정",
+            "하나는 전액본인부담(삭감)",
+            "고지혈증 이상지질혈증.md")
+
+    # N12. 항히스타민 2종 이상 → 1종만 보험
+    used_ah = order_set & ANTIHISTAMINE_CODES
+    if len(used_ah) >= 2:
+        _append(results, "err",
+            f"항히스타민 {len(used_ah)}종 동시 → 1종만 보험: {', '.join(sorted(used_ah))}",
+            "나머지는 삭감. 하나는 f12 비급여",
+            "항히스타민제 정리.md")
+
+    # N13. 항혈소판제 2종 동시 삭감
+    used_ap = order_set & ANTIPLATELET_CODES
+    if len(used_ap) >= 2:
+        _append(results, "err",
+            f"항혈소판제 2종 동시 삭감: {', '.join(sorted(used_ap))}",
+            "항혈소판제 2종 병용은 무조건 삭감",
+            "인수인계_2026년3월.md")
+
+    # N32. 해열소염진통제 계열 3종 이상 삭감
+    used_pain = order_set & NSAID_ANALGESIC_ALL
+    if len(used_pain) >= 3:
+        _append(results, "err",
+            f"해열소염진통제 {len(used_pain)}종 → 3종부터 삭감: {', '.join(sorted(used_pain))}",
+            "NSAIDs + AAP + tramadol 합쳐서 2종까지",
+            "인수인계_2026년3월.md")
+
+    # N15. co(코데날) 12세 미만 사용 금기
+    if patient_type == "소아" and "co" in order_set:
+        _append(results, "err",
+            "co(코데날) → 12세 미만 사용 금기",
+            "codeine 포함 제제. 소아는 dropsy/umk 등 사용",
+            "소아 독감 influenza.md")
+
+    # N16. 소아 + d(디클로페낙) → 5세 미만은 di(비급여)
+    if patient_type == "소아" and "d" in order_set:
+        _append(results, "warn",
+            "소아 d(디클로페낙) → 5세 미만은 di(비급여코드) 사용",
+            "5세 이상부터 d(급여). 체중별 용량: 10kg=0.2, 15kg=0.25, 20kg=0.33, 30kg=0.5",
+            "소아 URI.md")
+
+    # N17. 소아 dexisy + 장염 단독 → 추가 상병 필요
+    if patient_type == "소아" and "dexisy" in order_set:
+        if (dx_set & ENTERITIS_DX) and not (dx_set - ENTERITIS_DX):
+            _append(results, "warn",
+                "소아 dexisy + 장염 단독 → r5099(FUO) 또는 r51(두통) 추가 필요",
+                "장염에 NSAID 삭감. 발열/두통 상병 추가",
+                "소아 AGE FGID.md")
+
+    # N19. PCAB(pcab) + PPI/H2 병용 금지
+    if "pcab" in order_set:
+        ppi_h2 = order_set & {"ppi","ppi2","cime","famo"}
+        if ppi_h2:
+            _append(results, "err",
+                f"PCAB(위캡) + {', '.join(sorted(ppi_h2))} 병용 금지",
+                "PCAB은 PPI/H2 blocker와 병용 불가. 1회 최대 4주까지만 보험",
+                "인수인계_2026년3월.md")
+
+    # N21. famotidine 용량별 필수 상병
+    # famo는 20mg. 현재 용량 구분 못하므로 일반 안내
+    if "famo" in order_set:
+        if not (dx_set & (GASTRITIS_DX | ESOPHAGITIS_DX | {"k25","k26","k27","k28"})):
+            _append(results, "warn",
+                "famo(파모티딘) → 위염/식도염/궤양 상병 필요",
+                "20mg QD는 위염 가능. 40mg QD 또는 20mg BID는 궤양/GERD 코드 필요",
+                "인수인계_2026년3월.md")
+
+    # N22. macpo/dom 5일 이상 삭감 안내
+    if {"macpo","dom"} & order_set:
+        _append(results, "info",
+            "macpo/dom → 5일 이상 연속 처방시 삭감",
+            "단기간만 사용. 장기 필요시 trime/mosa로 변경",
+            "인수인계_2026년3월.md")
+
+    # N25. 비급여 전용 약 + 보험접수 경고
+    used_nonins = order_set & NONINSURANCE_DRUG_CODES
+    if used_nonins:
+        _append(results, "err",
+            f"비급여 전용약({', '.join(sorted(used_nonins))}) → 일반접수 전용",
+            "비만/발기부전/사후피임/탈모 약은 보험접수 불가. j00 감기코드로 일반접수",
+            "인수인계_2026년3월.md")
+
+    # N27. zolpidem(zol) 최대 28일
+    if "zol" in order_set:
+        _append(results, "warn",
+            "zol(졸피뎀) → 최대 28일까지만 처방 가능",
+            "향정신성의약품. 다른 향정신성의약품(식욕억제제 등)과 절대 중복 불가",
+            "인수인계_2026년3월.md")
+
+    # N29. 치매 상병 + 약 처방 → 비급여 전용
+    dementia_dx = {c for c in dx_set if c.startswith(DEMENTIA_DX_PREFIX)}
+    if dementia_dx and (order_set - {"cd"}):
+        _append(results, "err",
+            "치매 상병 + 약 처방 → 1차기관 보험 불가",
+            "아리셉트(도네페질) 등 초처방 절대 불가. 비급여 전용",
+            "치매 관련 약들 dementia.md")
+
+    # N30. 베니톨(치질약) 최장 7일
+    if "베니톨" in order_set or "benytol" in order_set:
+        _append(results, "warn",
+            "베니톨(치질약) → 최장 7일까지만 인정",
+            "장기사용시 정맥임파부전 상병 필요",
+            "인수인계_2026년3월.md")
+
+    # N31. 화상 bdres2 → 수족지/안면/경부/성기 부위 상병 필수
+    if "bdres2" in order_set:
+        burn_face_dx = {c for c in dx_set if c.startswith(("t20","t21","t22","t23","t24","t25"))}
+        if not burn_face_dx:
+            _append(results, "warn",
+                "bdres2(화상드레싱-수족지/안면) → 해당 부위 화상 상병 필수",
+                "수족지/안면/경부/성기 포함 화상 상병 없으면 삭감",
+                "화상 Burn.md")
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
