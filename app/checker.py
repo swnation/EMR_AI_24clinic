@@ -1,112 +1,71 @@
 import json
 from typing import List, Dict
+from app import drug_db
 
 with open("rules/rules.json", encoding="utf-8") as f:
     RULES = json.load(f)["rules"]
 
-# ── 상병 코드 세트 ──
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 상수: drug_db에서 동적으로 가져옴
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# ── 상병 코드 세트 (상병은 약물DB가 아니므로 여기에 유지) ──
 RESP_CODES = {"j00","j040","j060","j0180","j0390","j209","j189","j303","j22","j111"}
 MUSCULO_CODES = {"m545","m542","m79","m791","m792"}
 
-# ── 진해거담제 (심평원 분류 기준) ──
-# suda/suda2는 카운팅에서 제외됨
-# 성인: co/cosy = cough, erdo/ac/drop = sputum → 총 2종까지
-ANTITUSSIVE_ADULT = {"co","cosy","drop","erdo","ac"}
-# 소아: dropsy/ambsy/umk = cough, ac2 = sputum → 6세미만 3종, 6세이상 2종
-ANTITUSSIVE_PED = {"dropsy","ambsy","umk","ac2"}
-
-# 같은 분류(sputum) 병용 삭감 조합
-SPUTUM_ADULT = {"erdo","ac","drop"}    # 성인 sputum 분류
-SPUTUM_PED = {"ac2"}                    # 소아 sputum 분류 (1종뿐이라 중복 없음)
+# ── 진해거담제: drug_db의 _antitussive_count_rules에서 가져옴 ──
+ANTITUSSIVE_ADULT = drug_db.antitussive_adult_codes()  # {"co","cosy","drop","erdo","ac"}
+ANTITUSSIVE_PED = drug_db.antitussive_ped_codes()      # {"dropsy","ambsy","umk","ac2",...}
+SPUTUM_ADULT = {"erdo","ac","drop"}     # 같은 분류(거담제) 병용 삭감
 
 # ── 약품별 필수 상병 ──
-# ac/erdo → j040(후두염), j0180(부비동염), j209(기관지염) 중 하나 필요
 AC_REQUIRED_DX = {"j040","j0180","j209"}
-# umk → j209(기관지염) 필요
 UMK_REQUIRED_DX = {"j209"}
-# atock/pat → j209(기관지염) 또는 j459(천식) 필요
 ATOCK_REQUIRED_DX = {"j209","j459"}
-# tan(탄툼가글) → 하기도(j22,j209)에 삭감, 상기도만 가능
 TAN_BANNED_DX = {"j22","j209"}
 
-# ── IM 주사제 ──
-IM_CODES = {"tra","d","bus","tr","mac","pheni","dexa","genta","linco","ambi","epi"}
-# dexa 필수 상병: j040(후두염) 또는 j303(비염)
+# ── IM 주사제: drug_db에서 가져옴 ──
+IM_CODES = drug_db.im_codes()
 DEXA_REQUIRED_DX = {"j040","j303"}
 
-# ── 수액 코드 ──
-IV_FLUID_CODES = {"ns","ns110","mc","gw6","gw8","gw10","gw15","3cefaiv","ampiiv","tamiiv","tyiv"}
+# ── 수액: drug_db에서 가져옴 ──
+IV_FLUID_CODES = drug_db.iv_fluid_codes() | {"3cefaiv","ampiiv","tamiiv","tyiv"}
 
-# ── 타미플루 계열 ──
-TAMIFLU_CODES = {"tami75","tami30","tami45","tamisy","tamiiv"}
+# ── 타미플루: drug_db에서 가져옴 ──
+TAMIFLU_CODES = drug_db.tamiflu_codes()
 FLU_DX = {"j111","j111-1","j09","j10","j11"}
 
-# ── 항생제 ──
-ANTIBIOTICS = {"aug2","aug","cefa","clari","clari2","cipro","levo","levo250",
-               "augsy","clarisy","cefasy","3cefa","3cefasy","3cefaiv","ampiiv","linco"}
+# ── 항생제: drug_db에서 가져옴 ──
+ANTIBIOTICS = drug_db.antibiotics_codes()
 
-# ── 약+약 삭감 (동시 보험 불가, 하나는 f12) ──
-# co+cosy 같은 성분
-# atock+pat 같은 분류
-# ty+semi / NSAID+set / ty+set
-NSAID_CODES = {"loxo","dexi","dexisy","bru","d"}
-AAP_CODES = {"ty","ty325","tykid","semi","set"}
+# ── 약+약 삭감 ──
+NSAID_CODES = drug_db.nsaid_codes()
+AAP_CODES = drug_db.aap_codes()
 
-# 소화제 (2종 이상 삭감)
-PROKINETICS = {"macpo","dom","trime","levo","mosa","trimesy"}
+# ── 소화제: drug_db에서 가져옴 ──
+PROKINETICS = drug_db.prokinetics_codes()
 
-# ── 상병+약 삭감 (해당 상병으로는 보험 불가 → 추가 상병 필요) ──
-# dexa/pd + 감기(j00)/인후두염(j060)/편도염(j0390)/기관지염(j209) → 삭감
-# → 후두염(j040)/비염(j303)/피부염(l309)에만 보험
+# ── 상병+약 삭감 (상병 코드는 약물DB가 아니므로 여기에 유지) ──
 DEXA_PD_BANNED_DX = {"j00","j060","j0390","j209"}
 DEXA_PD_OK_DX = {"j040","j303","l309","l500"}
-
-# 비염(j303)에 항생제/NSAID 삭감
 RHINITIS_DX = {"j303"}
-
-# kina는 J코드(호흡기) 아니면 삭감
 KINA_REQUIRED_PREFIX = "j"
-
-# 바이럴 상병 (항생제 삭감)
-VIRAL_DX = {"j111","j111-1","b084","b08","b01","b019"}  # 인플루엔자, 수족구, 수두
-
-# 위염 상병
+VIRAL_DX = {"j111","j111-1","b084","b08","b01","b019"}
 GASTRITIS_DX = {"k297","k29","k290","k295","k296"}
-# 장염 상병
 ENTERITIS_DX = {"a09","a090","a099","k529"}
-# 식도염 상병
 ESOPHAGITIS_DX = {"k210","k219","k21"}
-
-# 두통 상병
 HEADACHE_DX = {"r51"}
-
-# 소화성궤양용제 (방어인자+공격인자 중 1종만)
-GASTRIC_DEFENSE = {"reba"}              # 방어인자 증강
-GASTRIC_ATTACK = {"cime","famo","ppi","ppi2","pcab"}  # 공격인자 억제 (H2 blocker + PPI)
-
-# macpo/dom 필수 상병: r11(구역/구토)만
+GASTRIC_DEFENSE = {"reba"}
+GASTRIC_ATTACK = {"cime","famo","ppi","ppi2","pcab"}
 MACPO_DOM_REQUIRED_DX = {"r11"}
-# levo/mosa: r11, k30, k58 가능
 LEVO_MOSA_OK_DX = {"r11","k30","k58","k580","k581","k582","k589"}
-# trime: 위염/장염/IBS/소화불량/구역 다 가능
 TRIME_OK_DX = {"r11","k30","k58","k580","k581","k589","k297","k29","a090","a084","a049"}
-
-# 대상포진
 ZOSTER_DX = {"b029","b02"}
-# 대상포진 후 신경통
 ZOSTER_NEURALGIA_DX = {"g530"}
-
-# 두드러기 상병
 URTICARIA_DX = {"l500","l501","l509","l50"}
-
-# epe(에페리손) 가능 상병: 경추통/요통만
 EPE_OK_DX = {"m542","m545","m543","m544"}
-
-# sme 필요: 설사 동반 장염
 SME_OK_DX = {"a090","a084","a049","k581"}
-SME_BANNED_DX = {"k589"}  # 설사 미동반 IBS
-
-# tra 사용 불가 상병 (단독)
+SME_BANNED_DX = {"k589"}
 TRA_BANNED_DX = {"a090","a084","a049","k58","k30","r11","k297","k29","k296"}
 
 
@@ -120,113 +79,94 @@ def _has_flu_dx(dx_set: set) -> bool:
     return _dx_startswith(dx_set, "j09") or _dx_startswith(dx_set, "j10") or _dx_startswith(dx_set, "j11")
 
 
-def run_check(dx: List[str], orders: List[str], symptoms: str, patient_type: str) -> List[Dict]:
-    dx_set = {c.lower().strip() for c in dx}
-    order_set = {c.lower().strip() for c in orders}
-    results = []
+def _append(results: list, level: str, message: str, sub: str = "", source: str = ""):
+    """결과 추가 헬퍼"""
+    results.append({"level": level, "message": message, "sub": sub, "source": source})
 
-    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    # [A] 진해거담제 룰
-    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# [A] 진해거담제 룰
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+def _check_antitussive(dx_set: set, order_set: set, patient_type: str, results: list):
     # A-1. 성인 진해거담제 2종 초과
     if patient_type != "소아":
         used = order_set & ANTITUSSIVE_ADULT
         if len(used) > 2:
-            results.append({
-                "level": "err",
-                "message": f"진해거담제 {len(used)}종 → 성인 2종까지만 보험",
-                "sub": f"사용 중: {', '.join(sorted(used))}. suda는 카운팅 제외",
-                "source": "인수인계_2026년3월.md"
-            })
+            _append(results, "err",
+                f"진해거담제 {len(used)}종 → 성인 2종까지만 보험",
+                f"사용 중: {', '.join(sorted(used))}. suda는 카운팅 제외",
+                "인수인계_2026년3월.md")
 
     # A-2. 성인 같은 분류(sputum) 약물 중복 → 삭감
     if patient_type != "소아":
         used_sputum = order_set & SPUTUM_ADULT
         if len(used_sputum) >= 2:
-            results.append({
-                "level": "err",
-                "message": f"거담제(sputum) 중복: {', '.join(sorted(used_sputum))} → 삭감",
-                "sub": "같은 분류(erdo/ac/drop) 병용 불가. 하나는 f12 비급여 처리",
-                "source": "인수인계_2026년3월.md"
-            })
+            _append(results, "err",
+                f"거담제(sputum) 중복: {', '.join(sorted(used_sputum))} → 삭감",
+                "같은 분류(erdo/ac/drop) 병용 불가. 하나는 f12 비급여 처리",
+                "인수인계_2026년3월.md")
 
     # A-3. 소아 진해거담제 초과 (6세미만 3종, 6세이상 2종)
     if patient_type == "소아":
         used = order_set & ANTITUSSIVE_PED
-        # 정확한 나이를 모르므로 3종 초과시 경고
         if len(used) > 3:
-            results.append({
-                "level": "err",
-                "message": f"소아 진해거담제 {len(used)}종 → 삭감",
-                "sub": "6세미만 3종, 6세이상 2종까지. suda2는 카운팅 제외",
-                "source": "소아 URI(만12세 미만).md"
-            })
+            _append(results, "err",
+                f"소아 진해거담제 {len(used)}종 → 삭감",
+                "6세미만 3종, 6세이상 2종까지. suda2는 카운팅 제외",
+                "소아 URI(만12세 미만).md")
 
     # A-4. ac/erdo 처방 시 필수 상병(j040/j0180/j209) 누락
     if {"ac","erdo"} & order_set:
         if dx_set and not (dx_set & AC_REQUIRED_DX):
-            results.append({
-                "level": "warn",
-                "message": "ac/erdo → 후두염(j040), 부비동염(j0180), 기관지염(j209) 상병 필요",
-                "sub": "후두염/부비동염 사용 시 연결코드 기관지염 삭제해주기",
-                "source": "인수인계_2026년3월.md"
-            })
+            _append(results, "warn",
+                "ac/erdo → 후두염(j040), 부비동염(j0180), 기관지염(j209) 상병 필요",
+                "후두염/부비동염 사용 시 연결코드 기관지염 삭제해주기",
+                "인수인계_2026년3월.md")
 
     # A-5. umk 필수 상병(j209 기관지염) 누락
     if "umk" in order_set:
         if dx_set and not (dx_set & UMK_REQUIRED_DX):
-            results.append({
-                "level": "warn",
-                "message": "umk(움카민) → j209(기관지염) 상병 필요",
-                "sub": "대부분의 소아 진해거담제가 기관지염에만 보험",
-                "source": "소아 URI(만12세 미만).md"
-            })
+            _append(results, "warn",
+                "umk(움카민) → j209(기관지염) 상병 필요",
+                "대부분의 소아 진해거담제가 기관지염에만 보험",
+                "소아 URI(만12세 미만).md")
 
     # A-6. umk 소아 용량 고정 경고
     if patient_type == "소아" and "umk" in order_set:
-        results.append({
-            "level": "warn",
-            "message": "umk 소아 용량 고정 — 벗어나면 삭감",
-            "sub": "1~6세미만: 총량 9mL TID / 6~12세미만: 총량 18mL TID. Kg 무관",
-            "source": "인수인계_2026년3월.md"
-        })
+        _append(results, "warn",
+            "umk 소아 용량 고정 — 벗어나면 삭감",
+            "1~6세미만: 총량 9mL TID / 6~12세미만: 총량 18mL TID. Kg 무관",
+            "인수인계_2026년3월.md")
 
     # A-7. tan(탄툼가글) + 하기도 상병 → 삭감
     if "tan" in order_set:
         if dx_set & TAN_BANNED_DX:
-            results.append({
-                "level": "err",
-                "message": "tan(탄툼가글) + 하기도 상병(j22/j209) → 삭감",
-                "sub": "상기도 상병, 구내염 등에만 사용 가능. 1달에 100ml 한 통만 보험",
-                "source": "인수인계_2026년3월.md"
-            })
+            _append(results, "err",
+                "tan(탄툼가글) + 하기도 상병(j22/j209) → 삭감",
+                "상기도 상병, 구내염 등에만 사용 가능. 1달에 100ml 한 통만 보험",
+                "인수인계_2026년3월.md")
 
     # A-8. atock/pat → j209 또는 j459 필요
     if {"atock","atock2","pat1","pat2","pat3"} & order_set:
         if dx_set and not (dx_set & ATOCK_REQUIRED_DX):
-            results.append({
-                "level": "warn",
-                "message": "atock/pat → j209(기관지염) 또는 j459(천식) 상병 필요",
-                "sub": "",
-                "source": "인수인계_2026년3월.md"
-            })
+            _append(results, "warn",
+                "atock/pat → j209(기관지염) 또는 j459(천식) 상병 필요",
+                "", "인수인계_2026년3월.md")
 
-    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    # [B] NSAIDs / 진통제 룰
-    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# [B] NSAIDs / 진통제 / 약+약 삭감 룰
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+def _check_pain_and_conflicts(dx_set: set, order_set: set, patient_type: str, results: list):
     # B-1. loxo + 호흡기 상병만 → 근골격계 상병 없음
     if "loxo" in order_set:
         has_resp = bool(dx_set & RESP_CODES)
         has_musculo = bool(dx_set & MUSCULO_CODES)
         if has_resp and not has_musculo:
-            results.append({
-                "level": "err",
-                "message": "loxo + 호흡기 상병만 있음 → 삭감",
-                "sub": "m545(아래허리통증) 등 근골격계 상병 추가 필요",
-                "source": "인수인계_2026년3월.md"
-            })
+            _append(results, "err",
+                "loxo + 호흡기 상병만 있음 → 삭감",
+                "m545(아래허리통증) 등 근골격계 상병 추가 필요",
+                "인수인계_2026년3월.md")
 
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     # [B2] 약+약 삭감 (동시 보험 불가 → 하나는 f12)
@@ -317,10 +257,12 @@ def run_check(dx: List[str], orders: List[str], symptoms: str, patient_type: str
             "source": "네이버카페 — 자주하는 지적질 모음"
         })
 
-    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    # [B3] 상병+약 삭감 (해당 상병으로 보험 불가 → 추가 상병 필요)
-    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# [B3] 상병+약 삭감
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+def _check_dx_drug_conflicts(dx_set: set, order_set: set, dx: list, patient_type: str, results: list):
     # B3-1. dexa/pd + 감기/인후두염/편도염/기관지염 → 삭감
     if {"dexa","pd"} & order_set:
         banned = dx_set & DEXA_PD_BANNED_DX
@@ -441,10 +383,12 @@ def run_check(dx: List[str], orders: List[str], symptoms: str, patient_type: str
                 "source": "네이버카페 — 자주하는 지적질 모음"
             })
 
-    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    # [C] 주사/수액 룰
-    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# [C] 주사/수액 룰
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+def _check_injection(dx_set: set, order_set: set, patient_type: str, results: list):
     # C-1. 주사 2종 이상 → -b 코드
     used_im = order_set & IM_CODES
     if len(used_im) >= 2:
@@ -488,10 +432,12 @@ def run_check(dx: List[str], orders: List[str], symptoms: str, patient_type: str
                 "source": "소아 독감 influenza.md"
             })
 
-    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    # [D] 독감/항바이러스 룰
-    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# [D] 독감/항바이러스 룰
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+def _check_flu(dx_set: set, order_set: set, results: list):
     used_tami = order_set & TAMIFLU_CODES
     if used_tami:
         # D-1. 타미플루 + 독감 상병(j111-1) 누락
@@ -521,10 +467,12 @@ def run_check(dx: List[str], orders: List[str], symptoms: str, patient_type: str
                 "source": "독감 influenza.md"
             })
 
-    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    # [E] 공통 안전 룰
-    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# [E] 공통 안전 룰
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+def _check_common(dx_set: set, order_set: set, dx: list, patient_type: str, results: list):
     # E-1. dige(ranitidine) 사용 금지
     if "dige" in order_set:
         results.append({
@@ -875,13 +823,24 @@ def run_check(dx: List[str], orders: List[str], symptoms: str, patient_type: str
                 "source": "인수인계_2026년3월.md"
             })
 
-    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 메인 진입점
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+def run_check(dx: List[str], orders: List[str], symptoms: str, patient_type: str) -> List[Dict]:
+    dx_set = {c.lower().strip() for c in dx}
+    order_set = {c.lower().strip() for c in orders}
+    results: List[Dict] = []
+
+    _check_antitussive(dx_set, order_set, patient_type, results)
+    _check_pain_and_conflicts(dx_set, order_set, patient_type, results)
+    _check_dx_drug_conflicts(dx_set, order_set, dx, patient_type, results)
+    _check_injection(dx_set, order_set, patient_type, results)
+    _check_flu(dx_set, order_set, results)
+    _check_common(dx_set, order_set, dx, patient_type, results)
+
     if not results:
-        results.append({
-            "level": "ok",
-            "message": "체크 항목 이상 없음",
-            "sub": "",
-            "source": ""
-        })
+        _append(results, "ok", "체크 항목 이상 없음")
 
     return results
