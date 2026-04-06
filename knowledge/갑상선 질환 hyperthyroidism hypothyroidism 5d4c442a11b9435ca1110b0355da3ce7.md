@@ -1,0 +1,1 @@
+# 갑상선 질환 hyperthyroidism hypothyroidism

@@ -1,0 +1,90 @@
+{
+  "진해거담제": {
+    "성인": {
+      "cough": ["co", "cosy"],
+      "sputum": ["erdo", "ac", "drop"],
+      "rhinorrhea": ["suda"],
+      "limit": 2,
+      "limit_lower_resp": 3,
+      "lower_resp_dx": ["j22", "j209"],
+      "excluded_from_count": ["suda", "kina", "pat1", "pat2", "pat3"],
+      "note": "suda는 카운팅 제외. 하기도(j22/j209)는 3종까지"
+    },
+    "소아": {
+      "cough": ["dropsy", "ambsy", "umk"],
+      "sputum": ["ac2"],
+      "rhinorrhea": ["suda2"],
+      "limit_under6": 3,
+      "limit_6plus": 2,
+      "excluded_from_count": ["suda2"],
+      "note": "suda2 카운팅 제외. 6세미만 3종, 6세이상 2종"
+    },
+    "same_class_conflicts": [
+      {"codes": ["co", "cosy"], "reason": "같은 성분(중추성 기침억제)"},
+      {"codes": ["erdo", "ac", "drop"], "reason": "같은 분류(거담제). 2종이상 삭감"},
+      {"codes": ["atock", "atock2", "pat1", "pat2", "pat3"], "reason": "같은 분류(B2 agonist). 동시 삭감"}
+    ]
+  },
+  "NSAIDs": {
+    "codes": ["loxo", "dexi", "dexisy", "bru", "d"],
+    "note": "loxo는 호흡기 상병에 삭감 → m545 등 근골격 상병 추가 필요"
+  },
+  "AAP": {
+    "codes": ["ty", "ty325", "tykid", "tysy", "typow", "semi", "set"],
+    "conflicts": [
+      {"pair": ["ty", "semi"], "reason": "삭감"},
+      {"pair": ["ty325", "semi"], "reason": "삭감"},
+      {"pair": ["ty", "set"], "reason": "삭감"},
+      {"pair": ["set", "NSAIDs"], "reason": "삭감. semi+NSAIDs는 가능"}
+    ]
+  },
+  "항생제": {
+    "codes": ["aug", "aug2", "cefa", "clari", "clari2", "cipro", "levo", "levo250",
+              "augsy", "clarisy", "cefasy", "3cefa", "3cefasy", "3cefaiv", "ampiiv", "linco"],
+    "limit": 1,
+    "note": "1차기관 항생제 2종 동시보험 무조건 삭감. 코멘트 달아도 삭감. 하나는 f12"
+  },
+  "주사제_IM": {
+    "codes": ["tra", "d", "bus", "tr", "mac", "pheni", "dexa", "genta", "linco", "ambi", "epi"],
+    "limit_insurance": 1,
+    "b_suffix": true,
+    "note": "1종만 보험. 나머지는 코드 뒤에 -b. 디클로페낙 제외(비급여 di 사용)",
+    "exceptions": ["d"]
+  },
+  "소화제_prokinetics": {
+    "codes": ["macpo", "dom", "trime", "levo", "mosa", "trimesy"],
+    "limit": 1,
+    "note": "경구 2종이상 삭감. IM+PO는 별개 판정. macpo/dom은 5일이상 삭감"
+  },
+  "소화성궤양용제": {
+    "defense": ["reba"],
+    "attack_h2": ["cime", "famo"],
+    "attack_ppi": ["ppi", "ppi2", "pcab"],
+    "conflicts": [
+      {"pair": ["ppi", "cime"], "reason": "PPI+H2blocker 삭감"},
+      {"pair": ["ppi", "famo"], "reason": "PPI+H2blocker 삭감"},
+      {"pair": ["ppi2", "cime"], "reason": "PPI+H2blocker 삭감"},
+      {"pair": ["ppi2", "famo"], "reason": "PPI+H2blocker 삭감"},
+      {"pair": ["pcab", "cime"], "reason": "PCAB+H2blocker 삭감"},
+      {"pair": ["pcab", "famo"], "reason": "PCAB+H2blocker 삭감"},
+      {"pair": ["reba", "cime"], "reason": "방어인자+공격인자 중 같은용법 삭감. sep도 삭감"}
+    ],
+    "note": "소화성궤양용제 분류 약 중 1종만. ppi쓸때는 reba 사용"
+  },
+  "소아약": {
+    "codes": ["augsy", "cefasy", "clarisy", "3cefasy", "typow", "tysy", "dropsy",
+              "ac2", "suda2", "dexisy", "cetisy", "tamisy", "ambsy", "umk", "lukasy"],
+    "max_age": 12,
+    "note": "가루약/시럽 만12세까지만 보험. 12세이상은 성인약+pow"
+  },
+  "향정신성의약품": {
+    "codes": ["zol", "디에타민", "큐시미아"],
+    "limit": 1,
+    "note": "중복 절대 불가. 수면제+식욕억제제 등"
+  },
+  "타미플루": {
+    "codes": ["tami75", "tami30", "tami45", "tamisy", "tamiiv"],
+    "required_dx": ["j111", "j111-1"],
+    "note": "j09-4는 2009 신종플루로 다름. 예방목적 QD x10d는 비보험(f12)"
+  }
+}
