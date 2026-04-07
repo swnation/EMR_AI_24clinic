@@ -17,11 +17,19 @@ app.mount("/static", StaticFiles(directory="frontend"), name="static")
 def root():
     return FileResponse("frontend/index.html")
 
+class OrderItem(BaseModel):
+    code: str                    # 약코드 "aug2"
+    dose: Optional[float] = None # 투여량 (1회분)
+    days: Optional[int] = None   # 투여일수
+    freq: Optional[int] = None   # 일투수 (1일 몇 회)
+
 class ScanRequest(BaseModel):
     dx: List[str] = []        # 상병코드 목록 ["j0390", "k297"]
-    orders: List[str] = []    # 오더코드 목록 ["aug2", "dexi", "loxo"]
+    orders: List[str] = []    # 오더코드 목록 ["aug2", "dexi", "loxo"] (하위호환)
+    order_details: List[OrderItem] = []  # 용량 포함 오더 (Phase 2+)
     symptoms: str = ""        # 증상 텍스트
     patient_type: str = "성인"  # "성인" | "소아"
+    age: Optional[int] = None # 나이 (세)
 
 class CheckResult(BaseModel):
     level: str   # err | warn | info | ok
@@ -31,7 +39,14 @@ class CheckResult(BaseModel):
 
 @app.post("/check", response_model=List[CheckResult])
 def check(req: ScanRequest):
-    results = run_check(req.dx, req.orders, req.symptoms, req.patient_type)
+    # order_details가 있으면 코드 목록 자동 추출 (하위호환)
+    order_codes = req.orders
+    if req.order_details:
+        order_codes = [o.code for o in req.order_details]
+    # order_details를 dict 리스트로 변환
+    order_detail_dicts = [o.dict() for o in req.order_details] if req.order_details else None
+    results = run_check(req.dx, order_codes, req.symptoms, req.patient_type,
+                        order_details=order_detail_dicts, age=req.age)
     return results
 
 # ── 템플릿 API ──

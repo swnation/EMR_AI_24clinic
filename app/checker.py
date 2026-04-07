@@ -1107,9 +1107,86 @@ def _check_common(dx_set: set, order_set: set, dx: list, patient_type: str, resu
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 메인 진입점
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-def run_check(dx: List[str], orders: List[str], symptoms: str, patient_type: str) -> List[Dict]:
+def _build_order_map(order_details: list) -> Dict[str, dict]:
+    """order_details를 code→info dict로 변환"""
+    if not order_details:
+        return {}
+    return {o["code"].lower().strip(): o for o in order_details}
+
+
+def _check_dosage(dx_set: set, order_set: set, order_map: Dict[str, dict],
+                  patient_type: str, age: int, results: list):
+    """용량/일수 기반 체크 (order_details가 있을 때만 동작)"""
+    if not order_map:
+        return
+
+    # D-macpo/dom 5일 이상 삭감
+    for code in ["macpo", "dom"]:
+        if code in order_map:
+            days = order_map[code].get("days")
+            if days and days >= 5:
+                _append(results, "err",
+                    f"{code} → {days}일 처방 → 5일 이상 삭감",
+                    "macpo/dom은 단기간(5일 미만)만 사용",
+                    "인수인계_2026년3월.md")
+
+    # D-dupha 5일 이상 삭감
+    if "dupha" in order_map:
+        days = order_map["dupha"].get("days")
+        if days and days >= 5:
+            _append(results, "err",
+                f"dupha → {days}일 → 5일 이상 연속 삭감",
+                "", "인수인계_2026년3월.md")
+
+    # D-zolpidem 28일 초과
+    if "zol" in order_map:
+        days = order_map["zol"].get("days")
+        if days and days > 28:
+            _append(results, "err",
+                f"zol → {days}일 → 최대 28일 초과",
+                "향정신성의약품 처방일수 제한",
+                "인수인계_2026년3월.md")
+
+    # D-항생제 10일 초과
+    ab_in_order = order_set & drug_db.antibiotics_codes()
+    for code in ab_in_order:
+        if code in order_map:
+            days = order_map[code].get("days")
+            if days and days > 10:
+                _append(results, "warn",
+                    f"{code} → {days}일 → 항생제 10일 초과",
+                    "항생제 최대 10일. clari 연속 10일 초과 시 변경 필요",
+                    "약물 최대 처방일수.pdf")
+
+    # D-ephed 10일 초과
+    if "ephed" in order_map:
+        days = order_map["ephed"].get("days")
+        if days and days > 10:
+            _append(results, "err",
+                f"ephed → {days}일 → 최대 10일 초과",
+                "리노에바스텔 최대 10일까지만",
+                "인수인계_2026년3월.md")
+
+    # D-PPI QD 1T만 (freq/dose 체크)
+    for ppi_code in ["ppi", "ppi2", "pcab", "ol1", "ol2", "ol+"]:
+        if ppi_code in order_map:
+            freq = order_map[ppi_code].get("freq")
+            dose = order_map[ppi_code].get("dose")
+            if freq and freq > 1:
+                _append(results, "err",
+                    f"{ppi_code} → {freq}회/일 → BID 삭감. QD 1T만 보험",
+                    "", "인수인계_2026년3월.md")
+            if dose and dose > 1:
+                _append(results, "err",
+                    f"{ppi_code} → {dose}T → 2T 이상 삭감. QD 1T만 보험",
+                    "", "인수인계_2026년3월.md")
+
+
+def run_check(dx: List[str], orders: List[str], symptoms: str, patient_type: str,
+              order_details: list = None, age: int = None) -> List[Dict]:
     dx_set = {c.lower().strip() for c in dx}
     order_set = {c.lower().strip() for c in orders}
+    order_map = _build_order_map(order_details)
     results: List[Dict] = []
 
     _check_antitussive(dx_set, order_set, patient_type, results)
@@ -1118,6 +1195,7 @@ def run_check(dx: List[str], orders: List[str], symptoms: str, patient_type: str
     _check_injection(dx_set, order_set, patient_type, results)
     _check_flu(dx_set, order_set, results)
     _check_common(dx_set, order_set, dx, patient_type, results)
+    _check_dosage(dx_set, order_set, order_map, patient_type, age or 0, results)
 
     if not results:
         _append(results, "ok", "체크 항목 이상 없음")
