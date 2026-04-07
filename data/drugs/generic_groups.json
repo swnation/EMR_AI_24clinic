@@ -1,0 +1,128 @@
+{
+  "_description": "동일 성분(generic) 약물 그룹. 같은 그룹 내 약물은 동일한 삭감 규칙 적용",
+
+  "sildenafil": {
+    "codes": ["palpal","palpal1","palpal2","sil","sil2","siladepil","sildenapil","silf","via50","via100","viafilm","bigman"],
+    "note": "PDE5 inhibitor. 모두 비급여(일반접수)"
+  },
+  "tadalafil": {
+    "codes": ["cial10","cial20","tadaday"],
+    "note": "PDE5 inhibitor. 모두 비급여. tadaday는 daily용"
+  },
+  "acetaminophen": {
+    "codes": ["ty","ty325","ty160","ty80","typow","tysy","aapiv","tyiv"],
+    "note": "같은 성분 병용 삭감 (ty+semi, ty+set)"
+  },
+  "diclofenac": {
+    "codes": ["d","di","dic"],
+    "note": "d=IM급여, di=IM비급여, dic=PO"
+  },
+  "dexibuprofen": {
+    "codes": ["dexi","dexi4","dexisy","dexisyp"],
+    "note": "dexi=성인PO, dexisy/dexisyp=소아시럽"
+  },
+  "amoxicillin_clavulanate": {
+    "codes": ["aug","aug2","augsy"],
+    "note": "aug=375mg, aug2=625mg, augsy=소아시럽"
+  },
+  "cefaclor": {
+    "codes": ["cefa","cefasy"],
+    "note": "cefa=성인캡슐, cefasy=소아시럽"
+  },
+  "clarithromycin": {
+    "codes": ["clari","clari2","clarisy"],
+    "note": "clari=250mg, clari2=500mg, clarisy=소아시럽"
+  },
+  "oseltamivir": {
+    "codes": ["tami75","tami30","tami45","tamisy","tamipow"],
+    "note": "tami75=성인, tami30/45=소아, tamisy/tamipow=소아시럽"
+  },
+  "loxoprofen": {
+    "codes": ["loxo"],
+    "note": "호흡기 상병만 있으면 m545 추가 필요"
+  },
+  "esomeprazole": {
+    "codes": ["ppi","ppi2","ol1","ol2","ol+"],
+    "note": "ppi=20mg, ppi2=40mg, ol계열=같은 성분 다른 제형"
+  },
+  "amlodipine": {
+    "codes": ["amlo","am","nova","samlo","sam"],
+    "note": "am/amlo/nova=amlodipine, sam/samlo=s-amlodipine"
+  },
+  "losartan": {
+    "codes": ["los1","los2","losa","los+","los+f","los+pro","losa+","losa+f","losa+pro"],
+    "note": "다양한 복합제 조합"
+  },
+  "valsartan": {
+    "codes": ["val40","val80","val160","av1","av2","av3","am5val80","am5val16","am10val"],
+    "note": "단독 + CCB복합제"
+  },
+  "atorvastatin": {
+    "codes": ["ato10","ato20","ato40","ato80","atoam"],
+    "note": "atoam=amlodipine+atorvastatin 복합제"
+  },
+  "rosuvastatin": {
+    "codes": ["rosu1","rosu2","rosu3"],
+    "note": "rosuvastatin+ezetimibe 복합제"
+  },
+  "acyclovir": {
+    "codes": ["acy","acyc"],
+    "note": "acy=PO, acyc=연고"
+  },
+  "tramadol": {
+    "codes": ["tra","trab","semi"],
+    "note": "tra=IM, trab=IM비급여, semi=PO(AAP+tramadol)"
+  },
+  "chlorpheniramine": {
+    "codes": ["phen","pheni","phenib"],
+    "note": "phen=PO, pheni=IM, phenib=IM비급여"
+  },
+  "dexamethasone": {
+    "codes": ["dexa","dexab"],
+    "note": "dexa=IM급여, dexab=IM비급여"
+  },
+  "gentamicin": {
+    "codes": ["genta","gentab"],
+    "note": "genta=IM급여, gentab=IM비급여"
+  },
+  "lincomycin": {
+    "codes": ["linco","lincob"],
+    "note": "linco=IM급여, lincob=IM비급여"
+  },
+  "febuxostat": {
+    "codes": ["febux40","febux80"],
+    "note": "통풍. 40mg/80mg"
+  },
+  "montelukast": {
+    "codes": ["luka10","luka5","luka4"],
+    "note": "나이별: 4mg(2~5세), 5mg(6~14세), 10mg(15세이상)"
+  },
+  "tulobuterol": {
+    "codes": ["atock","atock2","pat1","pat2","pat3"],
+    "note": "같은 분류 동시사용 삭감. j209/j459 필요"
+  },
+  "cetirizine": {
+    "codes": ["ceti","cetisy"],
+    "note": "ceti=성인정, cetisy=소아액"
+  },
+  "famotidine": {
+    "codes": ["famo"],
+    "note": "20mg QD=위염 가능. 40mg/BID=궤양/GERD 코드 필요"
+  },
+  "metoclopramide": {
+    "codes": ["macpo","mac","macb"],
+    "note": "macpo=PO, mac=IM급여, macb=IM비급여"
+  },
+  "domperidone": {
+    "codes": ["dom","dom2"],
+    "note": "dom=성인PO, dom2=소아과립"
+  },
+  "ibandronate": {
+    "codes": ["iban","von","vonb","vonbs","vonpo"],
+    "note": "골다공증. PO/IV 다양"
+  },
+  "risedronate": {
+    "codes": ["rise","rise35","rise150"],
+    "note": "골다공증. 35mg(주1회)/150mg(월1회)"
+  }
+}

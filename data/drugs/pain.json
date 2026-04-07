@@ -7,6 +7,7 @@
     "dexi":   {"name": "덱시부프로펜정", "generic": "dexibuprofen", "form": "po", "age": "성인", "insurance_price": 108, "claim_code": "669907820"},
     "dexi4":  {"name": "덱시부정400mg", "generic": "dexibuprofen 400mg", "form": "po", "age": "성인", "insurance_price": 154, "claim_code": "670100100"},
     "dexisy": {"name": "코코페디시럽", "generic": "dexibuprofen", "form": "po_liquid", "age": "소아", "insurance_price": 24, "claim_code": "645702251", "unit": "mL"},
+    "dexisyp": {"name": "코코페디시럽(중복코드)", "generic": "dexibuprofen", "form": "po_liquid", "age": "소아", "insurance_price": 24, "claim_code": "645702251", "unit": "mL"},
     "bru":    {"name": "부루펜정200mg", "generic": "ibuprofen", "form": "po", "age": "성인", "insurance_price": 34, "claim_code": "643900470"},
     "dic":    {"name": "다이크로짇정", "generic": "diclofenac", "form": "po", "age": "성인", "insurance_price": 10, "claim_code": "642100160"},
     "cereb":  {"name": "세레브렉스캡슐200mg", "generic": "celecoxib", "form": "po", "age": "성인", "insurance_price": 502, "claim_code": "073400280"},

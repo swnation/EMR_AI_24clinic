@@ -172,6 +172,45 @@ def same_class_conflicts() -> List[dict]:
     resp = raw("respiratory")
     return resp.get("_same_class_conflicts", [])
 
+# ── 동일 성분 그룹 ──
+_generic_groups: Dict[str, List[str]] = {}
+_code_to_generic: Dict[str, str] = {}
+
+def _load_generic_groups():
+    path = os.path.join(_BASE, "generic_groups.json")
+    if not os.path.exists(path):
+        return
+    with open(path, encoding="utf-8") as f:
+        data = json.load(f)
+    for generic_name, info in data.items():
+        if generic_name.startswith("_"):
+            continue
+        codes = info.get("codes", [])
+        _generic_groups[generic_name] = codes
+        for c in codes:
+            _code_to_generic[c] = generic_name
+
+_load_generic_groups()
+
+
+def same_generic(code: str) -> Set[str]:
+    """같은 성분의 다른 코드들 반환 (자기 자신 포함)"""
+    generic = _code_to_generic.get(code)
+    if not generic:
+        return {code}
+    return set(_generic_groups.get(generic, [code]))
+
+
+def generic_name(code: str) -> Optional[str]:
+    """코드의 성분 그룹명 반환"""
+    return _code_to_generic.get(code)
+
+
+def all_generic_groups() -> Dict[str, List[str]]:
+    """전체 성분 그룹 반환"""
+    return dict(_generic_groups)
+
+
 def drug_conflicts(file_key: str) -> List[dict]:
     """파일별 _conflicts 목록"""
     data = raw(file_key)

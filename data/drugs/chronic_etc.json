@@ -7,6 +7,7 @@
 
   "고혈압_CCB": {
     "amlo":   {"name": "암로디핀정5mg", "generic": "amlodipine", "form": "po", "insurance_price": 312, "claim_code": "628900880"},
+    "am":     {"name": "에버디핀정", "generic": "amlodipine", "form": "po", "insurance_price": 188, "note": "암로디핀 제네릭"},
     "sam":    {"name": "에스암로디핀정", "generic": "s-amlodipine", "form": "po", "insurance_price": 367},
     "samlo":  {"name": "노브디핀정5mg", "generic": "s-amlodipine", "form": "po", "insurance_price": 365},
     "nova":   {"name": "노바스크정5mg", "generic": "amlodipine", "form": "po", "insurance_price": 358},
@@ -29,6 +30,10 @@
     "tel1":   {"name": "텔미사르탄정40mg", "generic": "telmisartan", "form": "po", "insurance_price": 362},
     "tel2":   {"name": "텔미사르탄정80mg", "generic": "telmisartan", "form": "po", "insurance_price": 487},
     "enal":   {"name": "에날라프릴정", "generic": "enalapril(ACEi)", "form": "po", "insurance_price": 0}
+  },
+
+  "고혈압_ARB_CCB복합_에제티미브": {
+    "atoam":  {"name": "아토듀엣정5/10mg", "generic": "amlodipine/atorvastatin", "form": "po", "insurance_price": 623, "note": "CCB+스타틴 복합제"}
   },
 
   "고혈압_ARB_복합": {
@@ -134,7 +139,26 @@
     "propi":   {"name": "프로피베린정", "generic": "propiverine", "form": "po", "insurance_price": 615, "note": "과민성방광"},
     "gugu":    {"name": "구구정10mg", "generic": "solifenacin", "form": "po", "insurance_price": 0},
     "gugu1":   {"name": "구구정20mg", "generic": "solifenacin", "form": "po", "insurance_price": 0},
-    "gugu2":   {"name": "구구정5mg", "generic": "solifenacin", "form": "po", "insurance_price": 0}
+    "gugu2":   {"name": "구구정5mg", "generic": "solifenacin", "form": "po", "insurance_price": 0},
+    "bigman":  {"name": "비그만정", "generic": "sildenafil(BPH)", "form": "po", "insurance_price": 0, "note": "비급여"}
+  },
+
+  "발기부전": {
+    "_note": "모두 비급여. 일반접수 전용",
+    "palpal":    {"name": "팔팔정50mg", "generic": "sildenafil", "form": "po", "insurance_price": 0},
+    "palpal1":   {"name": "팔팔정100mg", "generic": "sildenafil", "form": "po", "insurance_price": 0},
+    "palpal2":   {"name": "팔팔정25mg", "generic": "sildenafil", "form": "po", "insurance_price": 0},
+    "sil":       {"name": "뉴비그라정100mg", "generic": "sildenafil", "form": "po", "insurance_price": 0},
+    "sil2":      {"name": "프리스틴100mg", "generic": "sildenafil", "form": "po", "insurance_price": 0},
+    "siladepil": {"name": "실라데필100mg", "generic": "sildenafil", "form": "po", "insurance_price": 0},
+    "sildenapil": {"name": "실데나필100mg", "generic": "sildenafil", "form": "po", "insurance_price": 0},
+    "silf":      {"name": "뉴씨그라필름", "generic": "sildenafil", "form": "po", "insurance_price": 0},
+    "via50":     {"name": "비아그라정50mg", "generic": "sildenafil", "form": "po", "insurance_price": 0},
+    "via100":    {"name": "비아그라정100mg", "generic": "sildenafil", "form": "po", "insurance_price": 0},
+    "viafilm":   {"name": "비아그라필름", "generic": "sildenafil", "form": "po", "insurance_price": 0},
+    "cial10":    {"name": "시알리스정10mg", "generic": "tadalafil", "form": "po", "insurance_price": 0},
+    "cial20":    {"name": "시알리스정20mg", "generic": "tadalafil", "form": "po", "insurance_price": 0},
+    "tadaday":   {"name": "데일라정5mg", "generic": "tadalafil(daily)", "form": "po", "insurance_price": 0}
   },
 
   "탈모_BPH": {
@@ -208,6 +232,52 @@
     "eb4":     {"name": "탄력붕대10cm", "insurance_price": 508},
     "splint1": {"name": "알루미늄손가락부목"},
     "splint2": {"name": "완성형손가락부목"}
+  },
+
+  "통풍": {
+    "allopu":   {"name": "알로퓨리놀정", "generic": "allopurinol", "form": "po", "insurance_price": 72},
+    "febux40":  {"name": "페북소스타트정40mg", "generic": "febuxostat", "form": "po", "insurance_price": 188},
+    "febux80":  {"name": "페북소스타트정80mg", "generic": "febuxostat", "form": "po", "insurance_price": 264}
+  },
+
+  "갑상선": {
+    "methima": {"name": "메티마졸정", "generic": "methimazole", "form": "po", "insurance_price": 39, "note": "갑상선항진증"},
+    "tirop":   {"name": "티파론정", "generic": "levothyroxine", "form": "po", "insurance_price": 135, "note": "갑상선저하증"}
+  },
+
+  "어지러움": {
+    "betahis":  {"name": "베타히스틴정24mg", "generic": "betahistine", "form": "po", "insurance_price": 0},
+    "tana120":  {"name": "타나민정120mg", "generic": "ginkgo biloba extract", "form": "po", "insurance_price": 0}
+  },
+
+  "PPI_추가": {
+    "ol1":  {"name": "에스올정10mg", "generic": "esomeprazole 10mg", "form": "po", "insurance_price": 227},
+    "ol2":  {"name": "에스올정20mg", "generic": "esomeprazole 20mg", "form": "po", "insurance_price": 416},
+    "ol+":  {"name": "에스올플러스정", "generic": "esomeprazole+NaHCO3", "form": "po", "insurance_price": 304}
+  },
+
+  "위장_기타": {
+    "al":   {"name": "알지나액", "generic": "sodium alginate", "form": "po_liquid", "insurance_price": 0, "note": "식도염에만 보험. 위염 삭감"},
+    "fam":  {"name": "오라빌정", "generic": "famciclovir", "form": "po", "insurance_price": 3760, "note": "대상포진 항바이러스"}
+  },
+
+  "NSAIDs_추가": {
+    "ace":     {"name": "아세파인정", "generic": "aceclofenac", "form": "po", "insurance_price": 188}
+  },
+
+  "당뇨_주사": {
+    "pia":  {"name": "인슐린아스파르트주", "generic": "insulin aspart", "form": "sc", "insurance_price": 10652}
+  },
+
+  "기타_비급여": {
+    "actiq":    {"name": "액티큐", "generic": "fentanyl lollipop", "form": "po", "insurance_price": 0, "note": "비급여 마약성진통제"},
+    "aeiol":    {"name": "에이올정", "generic": "unknown", "form": "po", "insurance_price": 0},
+    "albumin":  {"name": "알부민주20%", "generic": "albumin", "form": "iv", "insurance_price": 0},
+    "cure":     {"name": "큐레틴정", "generic": "curcumin?", "form": "po", "insurance_price": 0},
+    "curetin":  {"name": "큐레틴연질캡슐", "generic": "curcumin?", "form": "po", "insurance_price": 0},
+    "greentea": {"name": "다이엔캡슐", "generic": "green tea extract", "form": "po", "insurance_price": 0, "note": "비만 비급여"},
+    "trestan":  {"name": "트레스탄캡슐", "generic": "trazodone?", "form": "po", "insurance_price": 0},
+    "zoru":     {"name": "컨덴시아정", "generic": "unknown", "form": "po", "insurance_price": 0}
   },
 
   "기타": {
