@@ -84,6 +84,14 @@ DEMENTIA_DX_PREFIX = ("f00","f01","f02","f03","g30")
 BURN_FACE_HAND_CODES = {"bdres2"}
 HF_DX = {"i500","i501","i509","i50","i110","i130","i132"}
 
+# ── PDF 스캔 추가 상수 ──
+STOMATITIS_DX = {"k121","k1211","k122","k120"}
+STATIN_CODES = {"ato10","ato20","ato40","ato80","rosu1","rosu2","rosu3",
+                "sim1","sim2","simva","atoam","otpt"}
+GLAUCOMA_DX_PREFIX = ("h40","h42")
+BPH_DX = {"n400","n401","n402","n403","n409","n40"}
+COLCHICINE_CODES = {"콜킨","colchi"}
+
 
 def _dx_startswith(dx_set: set, prefix: str) -> bool:
     return any(c.startswith(prefix) for c in dx_set)
@@ -1006,6 +1014,94 @@ def _check_common(dx_set: set, order_set: set, dx: list, patient_type: str, resu
                 "bdres2(화상드레싱-수족지/안면) → 해당 부위 화상 상병 필수",
                 "수족지/안면/경부/성기 포함 화상 상병 없으면 삭감",
                 "화상 Burn.md")
+
+    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    # [P] 카페 PDF 스캔 기반 추가 룰
+    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    # P1. simvastatin + clarithromycin 병용 금기 (drug interaction)
+    if ({"sim1","sim2","simva"} & order_set) and ({"clari","clari2"} & order_set):
+        _append(results, "err",
+            "simvastatin + clarithromycin 병용 금기 (횡문근융해 위험)",
+            "스타틴 복용자에 clari 금기. augmentin/cefaclor 등으로 대체",
+            "고지혈증 _ 네이버 카페.pdf")
+
+    # P2. itraconazole + statin 병용 금기
+    if "itraco" in order_set and (order_set & STATIN_CODES):
+        _append(results, "err",
+            "itraconazole + statin 병용 금기",
+            "이트라코나졸 복용 중 스타틴 금기",
+            "약제 부작용 및 금기 _ 네이버 카페.pdf")
+
+    # P3. clarithromycin + colchicine 병용 금기
+    if ({"clari","clari2"} & order_set) and (order_set & COLCHICINE_CODES):
+        _append(results, "err",
+            "clarithromycin + colchicine 병용 금기",
+            "콜히친 독성 증가 위험",
+            "약제 부작용 및 금기 _ 네이버 카페.pdf")
+
+    # P4. 구내염에 suda/erdo/kina 삭감
+    if dx_set & STOMATITIS_DX:
+        bad_in_stom = order_set & {"suda","suda2","erdo","ac","kina"}
+        if bad_in_stom and not (dx_set - STOMATITIS_DX - {"k297"}):
+            _append(results, "err",
+                f"구내염 + {', '.join(sorted(bad_in_stom))} → 삭감",
+                "구내염에는 NSAID/스테로이드/항생제/탄툼만 가능",
+                "구내염 상병 처방약 _ 네이버 카페.pdf")
+
+    # P5. suda + 녹내장 금기
+    glaucoma_dx = {c for c in dx_set if c.startswith(GLAUCOMA_DX_PREFIX)}
+    if glaucoma_dx and ({"suda","suda2"} & order_set):
+        _append(results, "err",
+            "suda(pseudoephedrine) + 녹내장 → 금기",
+            "폐쇄각 녹내장 환자 pseudoephedrine 금기",
+            "약제 부작용 및 금기 _ 네이버 카페.pdf")
+
+    # P6. bus + 녹내장 금기
+    if glaucoma_dx and "bus" in order_set:
+        _append(results, "err",
+            "bus(부스코판) + 녹내장 → 금기",
+            "항콜린제 녹내장 환자 금기",
+            "약제 부작용 및 금기 _ 네이버 카페.pdf")
+
+    # P7. 항히스타민/co/bus + BPH 금기 (요저류)
+    bph_dx = dx_set & BPH_DX
+    if bph_dx:
+        bph_bad = order_set & {"phen","pheni","co","cosy","bus","uxsy"}
+        if bph_bad:
+            _append(results, "warn",
+                f"BPH(전립선비대) + {', '.join(sorted(bph_bad))} → 요저류 위험",
+                "1세대 항히스타민/코데날/부스코판은 전립선비대 환자 금기",
+                "약제 부작용 및 금기 _ 네이버 카페.pdf")
+
+    # P8. 1도 화상에 bdres(화상처치) 삭감 → dres만 가능
+    if "bdres1" in order_set:
+        burn_1st = {c for c in dx_set if c.startswith("t30") or "1도" in str(c)}
+        if not any(c.startswith(("t20","t21","t22","t23","t24","t25")) for c in dx_set):
+            _append(results, "warn",
+                "화상처치(bdres) → 2도 이상 + 부위 특정 화상 상병 필요",
+                "1도 화상이면 dres(단순처치)만 가능. 화상NOS도 삭감",
+                "상처와 화상 _ 네이버 카페.pdf")
+
+    # P9. PPI + 위염만 → 비보험 안내
+    ppi_in_order = order_set & {"ppi","ppi2","pcab","ol1","ol2","ol+"}
+    if ppi_in_order:
+        has_gastritis_only = (dx_set & GASTRITIS_DX) and not (dx_set & (ESOPHAGITIS_DX | {"k25","k26","k27","k28"}))
+        if has_gastritis_only:
+            _append(results, "warn",
+                f"PPI({', '.join(sorted(ppi_in_order))}) → 위염에 비보험, 식도염/궤양 상병 필요",
+                "PPI는 식도염(k21)/궤양(k25~k28)에만 보험. 위염만으로는 삭감",
+                "위염과 식도염(PPI) _ 네이버 카페.pdf")
+
+    # P10. reba + ppi 병용 가능 확인 (안내)
+    # (이미 reba+cime 삭감은 B2-8에 있음. reba+ppi는 가능이므로 별도 룰 불필요)
+
+    # P11. dres + 이물제거술 병용 삭감
+    if "dres" in order_set and any(c in order_set for c in ["이물제거","이물"]):
+        _append(results, "err",
+            "이물제거술 + dres(단순처치) → dres 삭감",
+            "이물제거술에 드레싱 포함. 별도 청구 불가",
+            "자주하는 지적질 모음 _ 네이버 카페.pdf")
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
