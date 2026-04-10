@@ -41,32 +41,12 @@ DX_PATTERN = re.compile(r'(?<![a-zA-Z])([a-zA-Z]\d{2,5}(?:-\d{1,2})?)(?!\d)', re
 ORDER_PATTERN = re.compile(r'\b([a-z][a-z0-9+]*\d*)\b', re.IGNORECASE)
 
 
-def _fix_ocr_dx(text: str) -> str:
-    """상병코드 OCR 오인식 보정"""
-    # 흔한 오인식 패턴 (의사랑 폰트 기반)
-    fixes = [
-        (r'ii(\d)', r'j\1'),       # ii0390 → j0390 (j→ii)
-        (r'Il(\d)', r'j\1'),       # Il303 → j303
-        (r'lI(\d)', r'j\1'),       # lI303 → j303
-        (r'll(\d)', r'j\1'),       # ll303 → j303
-        (r'[*\#](\d)', r'k\1'),    # *297 → k297, #297 → k297
-        (r'K(\d)', r'k\1'),        # K297 → k297
-        (r'J(\d)', r'j\1'),        # J0390 → j0390
-        (r'1(\d{3,})', r'j\1'),    # 10390 → j0390 (숫자 1을 j로)
-    ]
-    for pattern, repl in fixes:
-        text = re.sub(pattern, repl, text)
-    return text
-
-
 def parse_dx(text: str) -> List[str]:
     """상병 영역 텍스트에서 상병코드 추출"""
     if not text:
         return []
-    # OCR 오인식 보정
-    text = _fix_ocr_dx(text.lower())
-    # 패턴 매칭
-    codes = DX_PATTERN.findall(text)
+    # 소문자 변환 후 매칭
+    codes = DX_PATTERN.findall(text.lower())
     # 중복 제거, 순서 유지
     seen = set()
     result = []
