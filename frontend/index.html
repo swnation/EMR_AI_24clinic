@@ -499,6 +499,12 @@ async function runCheck() {
     })
   });
 
+  if (!resp.ok) {
+    document.getElementById('results').innerHTML =
+      '<div class="ri ri-err"><span class="ico">X</span><div>서버 오류: ' + resp.status + '</div></div>';
+    return;
+  }
+
   const data = await resp.json();
   const ico = { err: '\u2715', warn: '!', info: 'i', ok: '\u2713' };
   const cls = { err: 'ri-err', warn: 'ri-warn', info: 'ri-info', ok: 'ri-ok' };
