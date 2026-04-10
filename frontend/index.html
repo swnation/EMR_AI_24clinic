@@ -64,6 +64,15 @@ textarea { resize: vertical; min-height: 60px; }
 .copy-toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #333; color: #fff; padding: 8px 20px; border-radius: 20px; font-size: 13px; opacity: 0; transition: opacity .3s; pointer-events: none; z-index: 100; }
 .copy-toast.show { opacity: 1; }
 
+/* 이미지 붙여넣기 영역 */
+.paste-zone { border: 2px dashed #ccc; border-radius: 8px; padding: 12px; text-align: center; cursor: pointer; margin-top: 6px; transition: border-color .2s, background .2s; }
+.paste-zone:hover, .paste-zone:focus { border-color: #4a90d9; background: #f0f4fa; outline: none; }
+.paste-zone.has-image { border-color: #2e7d32; background: #e8f5e9; }
+.paste-icon { font-size: 20px; color: #aaa; display: block; }
+.paste-text { font-size: 11px; color: #999; }
+.paste-zone.loading .paste-text { color: #2c5f9e; }
+.ocr-result { font-size: 11px; color: #2e7d32; margin-top: 4px; }
+
 /* 상태표시 */
 .status { font-size: 11px; color: #999; text-align: center; margin-top: 8px; }
 </style>
@@ -96,14 +105,23 @@ textarea { resize: vertical; min-height: 60px; }
     </div>
 
     <div class="card">
-      <label>상병코드 (쉼표 또는 공백 구분)</label>
-      <input type="text" id="dx" placeholder="예: j0390 j303 k297 i109">
-      <div class="hint">의사랑에서 복사 또는 직접 입력</div>
+      <label>상병코드</label>
+      <input type="text" id="dx" placeholder="직접 입력 또는 의사랑 상병 영역 캡처 후 Ctrl+V">
+      <div class="paste-zone" id="dx-paste" tabindex="0">
+        <span class="paste-icon">+</span>
+        <span class="paste-text">Win+Shift+S로 상병 영역 캡처 → 여기 Ctrl+V</span>
+        <img id="dx-img" style="display:none; max-width:100%; margin-top:6px; border-radius:4px;">
+      </div>
     </div>
 
     <div class="card">
-      <label>오더코드 (쉼표 또는 공백 구분)</label>
-      <input type="text" id="orders" placeholder="예: aug2 dexi loxo reba cd">
+      <label>오더코드</label>
+      <input type="text" id="orders" placeholder="직접 입력 또는 의사랑 오더 영역 캡처 후 Ctrl+V">
+      <div class="paste-zone" id="orders-paste" tabindex="0">
+        <span class="paste-icon">+</span>
+        <span class="paste-text">Win+Shift+S로 오더 영역 캡처 → 여기 Ctrl+V</span>
+        <img id="orders-img" style="display:none; max-width:100%; margin-top:6px; border-radius:4px;">
+      </div>
     </div>
 
     <button class="btn" onclick="runCheck()">스캔하기 (F12)</button>
@@ -153,6 +171,65 @@ function switchTab(name) {
   event.target.classList.add('active');
   if (name === 'tpl' && !window._tplLoaded) loadTemplates();
 }
+
+/* ═══ 이미지 붙여넣기 → OCR ═══ */
+function setupPasteZone(zoneId, imgId, inputId, region) {
+  const zone = document.getElementById(zoneId);
+  const img = document.getElementById(imgId);
+  const input = document.getElementById(inputId);
+
+  zone.addEventListener('paste', async (e) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+    for (const item of items) {
+      if (item.type.startsWith('image/')) {
+        e.preventDefault();
+        const blob = item.getAsFile();
+        // 미리보기 표시
+        const url = URL.createObjectURL(blob);
+        img.src = url;
+        img.style.display = 'block';
+        zone.classList.add('has-image', 'loading');
+        zone.querySelector('.paste-text').textContent = 'OCR 처리 중...';
+
+        // base64 변환
+        const reader = new FileReader();
+        reader.onload = async () => {
+          const b64 = reader.result.split(',')[1];
+          try {
+            const resp = await fetch('/ocr', {
+              method: 'POST',
+              headers: {'Content-Type': 'application/json'},
+              body: JSON.stringify({ image_base64: b64, region: region })
+            });
+            const data = await resp.json();
+            zone.classList.remove('loading');
+            if (data.codes && data.codes.length > 0) {
+              input.value = data.codes.join(' ');
+              zone.querySelector('.paste-text').textContent =
+                'OCR 완료: ' + data.codes.join(', ');
+            } else {
+              zone.querySelector('.paste-text').textContent =
+                'OCR 텍스트: ' + (data.text || '인식 실패').substring(0, 80);
+            }
+          } catch (err) {
+            zone.classList.remove('loading');
+            zone.querySelector('.paste-text').textContent = 'OCR 오류: ' + err.message;
+          }
+        };
+        reader.readAsDataURL(blob);
+        return;
+      }
+    }
+  });
+
+  // 클릭 시 포커스 (Ctrl+V 받기 위해)
+  zone.addEventListener('click', () => zone.focus());
+}
+
+// 페이지 로드 시 붙여넣기 영역 설정
+setupPasteZone('dx-paste', 'dx-img', 'dx', 'dx');
+setupPasteZone('orders-paste', 'orders-img', 'orders', 'orders');
 
 /* ═══ 체크 기능 ═══ */
 function parse(str) {

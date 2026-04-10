@@ -1,9 +1,9 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, UploadFile, File
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from typing import List, Optional
-import json, os
+import json, os, base64, io, sys
 
 from app.checker import run_check
 from app.templates import get_all_templates, get_template_by_id, get_templates_by_category
@@ -87,6 +87,51 @@ def list_knowledge():
             if f.endswith(".md"):
                 files.append(f)
     return {"files": files}
+
+# ── OCR API (클립보드 이미지 → 텍스트) ──
+
+class OcrRequest(BaseModel):
+    image_base64: str   # base64 인코딩된 PNG 이미지
+    region: str = ""    # "dx" | "orders" | ""
+
+@app.post("/ocr")
+def ocr_image(req: OcrRequest):
+    """base64 이미지 → OCR → 텍스트 + 파싱된 코드 반환"""
+    try:
+        from PIL import Image
+        img_bytes = base64.b64decode(req.image_base64)
+        img = Image.open(io.BytesIO(img_bytes))
+
+        # Windows OCR 시도
+        text = ""
+        if sys.platform == "win32":
+            try:
+                from ocr.reader import ocr_image as win_ocr
+                text = win_ocr(img)
+            except Exception:
+                text = "[Windows OCR 실패]"
+        else:
+            text = "[OCR는 Windows에서만 동작]"
+
+        # 파싱
+        from ocr.parser import parse_dx, parse_orders
+        codes = []
+        order_details = []
+        if req.region == "dx":
+            codes = parse_dx(text)
+        elif req.region == "orders":
+            order_details = parse_orders(text)
+            codes = [o["code"] for o in order_details]
+        else:
+            codes = parse_dx(text)
+
+        return {
+            "text": text,
+            "codes": codes,
+            "order_details": order_details,
+        }
+    except Exception as e:
+        return {"text": "", "codes": [], "order_details": [], "error": str(e)}
 
 @app.get("/health")
 def health():
