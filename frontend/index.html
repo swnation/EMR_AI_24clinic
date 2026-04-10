@@ -88,6 +88,19 @@ textarea { resize: vertical; min-height: 60px; }
 
   <!-- ═══ 체크 탭 ═══ -->
   <div id="panel-check" class="tab-panel active">
+
+    <!-- 전체 캡처 (한번에) -->
+    <div class="card" style="background:#f0f4fa; border-color:#4a90d9;">
+      <label style="color:#2c5f9e;">전체 캡처 (Win+Shift+S → 의사랑 전체 → Ctrl+V)</label>
+      <div class="paste-zone" id="full-paste" tabindex="0" style="min-height:60px;">
+        <span class="paste-icon">+</span>
+        <span class="paste-text" id="full-paste-text">의사랑 전체 화면을 캡처해서 여기에 붙여넣기</span>
+        <canvas id="full-canvas" style="display:none; max-width:100%; margin-top:6px; cursor:crosshair; border:1px solid #ddd; border-radius:4px;"></canvas>
+      </div>
+      <div id="calib-guide" style="display:none; font-size:11px; color:#c62828; margin-top:4px; font-weight:600;"></div>
+      <button id="calib-btn" class="btn btn-sm btn-outline" style="display:none; margin-top:6px;" onclick="startCalibration()">영역 다시 설정</button>
+    </div>
+
     <div class="card">
       <div class="row">
         <div>
@@ -191,6 +204,197 @@ function switchTab(name) {
   event.target.classList.add('active');
   if (name === 'tpl' && !window._tplLoaded) loadTemplates();
 }
+
+/* ═══ 전체 캡처 → 4영역 자동 분할 ═══ */
+const REGION_NAMES = ['symptoms', 'special', 'dx', 'orders'];
+const REGION_LABELS = {
+  symptoms: '① 증상(차팅)',
+  special: '② 특이증상(과거력)',
+  dx: '③ 상병코드',
+  orders: '④ 오더목록'
+};
+let calibRegions = JSON.parse(localStorage.getItem('emr_regions') || 'null');
+let calibClicks = [];
+let calibStep = 0;
+let fullImage = null;
+
+function setupFullPaste() {
+  const zone = document.getElementById('full-paste');
+  const canvas = document.getElementById('full-canvas');
+  const ctx = canvas.getContext('2d');
+
+  zone.addEventListener('paste', async (e) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+    for (const item of items) {
+      if (item.type.startsWith('image/')) {
+        e.preventDefault();
+        const blob = item.getAsFile();
+        const img = new Image();
+        img.onload = () => {
+          fullImage = img;
+          // 캔버스에 표시
+          const maxW = zone.clientWidth - 24;
+          const scale = Math.min(maxW / img.width, 1);
+          canvas.width = img.width * scale;
+          canvas.height = img.height * scale;
+          canvas.style.display = 'block';
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+          if (calibRegions) {
+            // 캘리브레이션 완료됨 → 바로 분할+OCR
+            drawRegionBoxes(ctx, canvas.width, canvas.height);
+            autoSplitAndOcr(img);
+          } else {
+            // 캘리브레이션 필요
+            startCalibration();
+          }
+        };
+        img.src = URL.createObjectURL(blob);
+        return;
+      }
+    }
+  });
+  zone.addEventListener('click', (e) => {
+    if (calibStep > 0 && fullImage) {
+      handleCalibClick(e);
+    } else {
+      zone.focus();
+    }
+  });
+}
+
+function startCalibration() {
+  calibClicks = [];
+  calibStep = 1;
+  calibRegions = null;
+  localStorage.removeItem('emr_regions');
+  document.getElementById('calib-guide').style.display = 'block';
+  document.getElementById('calib-guide').textContent =
+    '① 증상(차팅) 영역의 좌상단을 클릭하세요';
+  document.getElementById('calib-btn').style.display = 'none';
+  document.getElementById('full-paste-text').textContent = '이미지 위에서 영역을 클릭하세요';
+}
+
+function handleCalibClick(e) {
+  const canvas = document.getElementById('full-canvas');
+  const rect = canvas.getBoundingClientRect();
+  const x = (e.clientX - rect.left) / canvas.width;
+  const y = (e.clientY - rect.top) / canvas.height;
+  calibClicks.push({x, y});
+
+  // 4개 영역 x 좌상단+우하단 = 8클릭
+  const steps = [
+    '① 증상(차팅) 좌상단', '① 증상(차팅) 우하단',
+    '② 특이증상(과거력) 좌상단', '② 특이증상(과거력) 우하단',
+    '③ 상병코드 좌상단', '③ 상병코드 우하단',
+    '④ 오더목록 좌상단', '④ 오더목록 우하단'
+  ];
+
+  // 클릭한 점 표시
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#c62828';
+  ctx.beginPath();
+  ctx.arc(x * canvas.width, y * canvas.height, 4, 0, Math.PI * 2);
+  ctx.fill();
+
+  if (calibClicks.length < 8) {
+    document.getElementById('calib-guide').textContent =
+      steps[calibClicks.length] + '을 클릭하세요 (' + calibClicks.length + '/8)';
+  } else {
+    // 캘리브레이션 완료
+    calibRegions = {};
+    for (let i = 0; i < 4; i++) {
+      const tl = calibClicks[i * 2];
+      const br = calibClicks[i * 2 + 1];
+      calibRegions[REGION_NAMES[i]] = {
+        x1: Math.min(tl.x, br.x), y1: Math.min(tl.y, br.y),
+        x2: Math.max(tl.x, br.x), y2: Math.max(tl.y, br.y)
+      };
+    }
+    localStorage.setItem('emr_regions', JSON.stringify(calibRegions));
+    calibStep = 0;
+    document.getElementById('calib-guide').textContent = '영역 설정 완료! 다음부터 자동 분할됩니다.';
+    document.getElementById('calib-btn').style.display = 'inline-block';
+
+    // 박스 그리기 + OCR
+    drawRegionBoxes(ctx, canvas.width, canvas.height);
+    autoSplitAndOcr(fullImage);
+  }
+}
+
+function drawRegionBoxes(ctx, cw, ch) {
+  if (!calibRegions) return;
+  const colors = ['#2c5f9e', '#6a1b9a', '#c62828', '#2e7d32'];
+  REGION_NAMES.forEach((name, i) => {
+    const r = calibRegions[name];
+    ctx.strokeStyle = colors[i];
+    ctx.lineWidth = 2;
+    ctx.strokeRect(r.x1 * cw, r.y1 * ch, (r.x2 - r.x1) * cw, (r.y2 - r.y1) * ch);
+    ctx.fillStyle = colors[i];
+    ctx.font = '11px sans-serif';
+    ctx.fillText(REGION_LABELS[name], r.x1 * cw + 4, r.y1 * ch + 14);
+  });
+}
+
+async function autoSplitAndOcr(img) {
+  if (!calibRegions) return;
+  document.getElementById('full-paste-text').textContent = 'OCR 처리 중... (4개 영역)';
+
+  for (const name of REGION_NAMES) {
+    const r = calibRegions[name];
+    // 원본 이미지에서 해당 영역 크롭
+    const cropCanvas = document.createElement('canvas');
+    const cx = Math.round(r.x1 * img.width);
+    const cy = Math.round(r.y1 * img.height);
+    const cw = Math.round((r.x2 - r.x1) * img.width);
+    const ch = Math.round((r.y2 - r.y1) * img.height);
+    cropCanvas.width = cw;
+    cropCanvas.height = ch;
+    cropCanvas.getContext('2d').drawImage(img, cx, cy, cw, ch, 0, 0, cw, ch);
+
+    // base64 변환
+    const b64 = cropCanvas.toDataURL('image/png').split(',')[1];
+
+    // OCR 요청
+    try {
+      const resp = await fetch('/ocr', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ image_base64: b64, region: name })
+      });
+      const data = await resp.json();
+
+      const input = document.getElementById(name === 'symptoms' ? 'symptoms' :
+                                             name === 'special' ? 'special' :
+                                             name === 'dx' ? 'dx' : 'orders');
+      if (name === 'symptoms' || name === 'special') {
+        input.value = data.text || '';
+      } else if (data.codes && data.codes.length > 0) {
+        input.value = data.codes.join(' ');
+      }
+
+      // 개별 영역 미리보기 업데이트
+      const zone = document.getElementById(name + '-paste');
+      if (zone) {
+        const zoneText = zone.querySelector('.paste-text');
+        if (name === 'symptoms' || name === 'special') {
+          zoneText.textContent = 'OCR: ' + (data.text || '').substring(0, 40);
+        } else {
+          zoneText.textContent = 'OCR: ' + (data.codes || []).join(', ');
+        }
+        zone.classList.add('has-image');
+      }
+    } catch (err) {
+      console.error(name, err);
+    }
+  }
+
+  document.getElementById('full-paste-text').textContent = 'OCR 완료! 아래에서 결과를 확인하세요.';
+  document.getElementById('calib-btn').style.display = 'inline-block';
+}
+
+setupFullPaste();
 
 /* ═══ 이미지 붙여넣기 → OCR ═══ */
 function setupPasteZone(zoneId, imgId, inputId, region) {
