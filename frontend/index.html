@@ -98,33 +98,53 @@ textarea { resize: vertical; min-height: 60px; }
           </select>
         </div>
         <div>
-          <label>증상 메모 (선택)</label>
-          <input type="text" id="symptoms" placeholder="c/s/r +/-/-">
+          <label>BW (kg)</label>
+          <input type="text" id="bw" placeholder="체중" style="width:60px;">
         </div>
       </div>
     </div>
 
     <div class="card">
-      <label>상병코드</label>
-      <input type="text" id="dx" placeholder="직접 입력 또는 의사랑 상병 영역 캡처 후 Ctrl+V">
+      <label>1. 증상 (차팅)</label>
+      <textarea id="symptoms" rows="3" placeholder="의사랑 증상탭에서 Ctrl+C → 여기 Ctrl+V&#10;또는 Win+Shift+S 캡처 → 아래 영역에 Ctrl+V"></textarea>
+      <div class="paste-zone" id="symptoms-paste" tabindex="0">
+        <span class="paste-icon">+</span>
+        <span class="paste-text">증상 탭 캡처 → Ctrl+V</span>
+        <img id="symptoms-img" style="display:none; max-width:100%; margin-top:6px; border-radius:4px;">
+      </div>
+    </div>
+
+    <div class="card">
+      <label>2. 특이증상 (과거력)</label>
+      <textarea id="special" rows="2" placeholder="의사랑 특이증상탭에서 Ctrl+C → 여기 Ctrl+V&#10;또는 캡처 → 아래 영역에 Ctrl+V"></textarea>
+      <div class="paste-zone" id="special-paste" tabindex="0">
+        <span class="paste-icon">+</span>
+        <span class="paste-text">특이증상 탭 캡처 → Ctrl+V</span>
+        <img id="special-img" style="display:none; max-width:100%; margin-top:6px; border-radius:4px;">
+      </div>
+    </div>
+
+    <div class="card">
+      <label>3. 상병코드</label>
+      <input type="text" id="dx" placeholder="직접 입력 또는 캡처 → Ctrl+V">
       <div class="paste-zone" id="dx-paste" tabindex="0">
         <span class="paste-icon">+</span>
-        <span class="paste-text">Win+Shift+S로 상병 영역 캡처 → 여기 Ctrl+V</span>
+        <span class="paste-text">상병 영역 캡처 → Ctrl+V</span>
         <img id="dx-img" style="display:none; max-width:100%; margin-top:6px; border-radius:4px;">
       </div>
     </div>
 
     <div class="card">
-      <label>오더코드</label>
-      <input type="text" id="orders" placeholder="직접 입력 또는 의사랑 오더 영역 캡처 후 Ctrl+V">
+      <label>4. 오더코드</label>
+      <input type="text" id="orders" placeholder="직접 입력 또는 캡처 → Ctrl+V">
       <div class="paste-zone" id="orders-paste" tabindex="0">
         <span class="paste-icon">+</span>
-        <span class="paste-text">Win+Shift+S로 오더 영역 캡처 → 여기 Ctrl+V</span>
+        <span class="paste-text">오더 영역 캡처 → Ctrl+V</span>
         <img id="orders-img" style="display:none; max-width:100%; margin-top:6px; border-radius:4px;">
       </div>
     </div>
 
-    <button class="btn" onclick="runCheck()">스캔하기 (F12)</button>
+    <button class="btn" onclick="runCheck()">스캔하기</button>
 
     <div class="results" id="results"></div>
     <div class="status" id="check-status"></div>
@@ -204,7 +224,12 @@ function setupPasteZone(zoneId, imgId, inputId, region) {
             });
             const data = await resp.json();
             zone.classList.remove('loading');
-            if (data.codes && data.codes.length > 0) {
+            if (region === 'symptoms' || region === 'special') {
+              // 증상/특이증상은 텍스트 그대로
+              input.value = data.text || '';
+              zone.querySelector('.paste-text').textContent =
+                'OCR 완료 (' + (data.text || '').length + '자)';
+            } else if (data.codes && data.codes.length > 0) {
               input.value = data.codes.join(' ');
               zone.querySelector('.paste-text').textContent =
                 'OCR 완료: ' + data.codes.join(', ');
@@ -228,6 +253,8 @@ function setupPasteZone(zoneId, imgId, inputId, region) {
 }
 
 // 페이지 로드 시 붙여넣기 영역 설정
+setupPasteZone('symptoms-paste', 'symptoms-img', 'symptoms', 'symptoms');
+setupPasteZone('special-paste', 'special-img', 'special', 'special');
 setupPasteZone('dx-paste', 'dx-img', 'dx', 'dx');
 setupPasteZone('orders-paste', 'orders-img', 'orders', 'orders');
 
