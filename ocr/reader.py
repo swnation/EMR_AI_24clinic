@@ -18,24 +18,13 @@ def _is_windows():
     return sys.platform == "win32"
 
 
-async def _ocr_winocr(image: Image.Image) -> str:
-    """winocr 패키지로 Windows OCR (한국어)"""
-    import winocr
-
-    # PIL → PNG bytes
-    buf = io.BytesIO()
-    image.save(buf, format="PNG")
-    png_bytes = buf.getvalue()
-
-    result = await winocr.recognize_png(png_bytes, lang="ko")
-    return result.text
-
-
 def ocr_image(image: Image.Image) -> str:
-    """이미지에서 텍스트 추출 (동기 래퍼)"""
+    """이미지에서 텍스트 추출"""
     if _is_windows():
         try:
-            return asyncio.run(_ocr_winocr(image))
+            from winocr import recognize_pil_sync
+            result = recognize_pil_sync(image, 'ko')
+            return result['text']
         except Exception as e:
             return f"[Windows OCR 실패: {e}]"
     else:
