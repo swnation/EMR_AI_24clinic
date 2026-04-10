@@ -122,6 +122,9 @@ def ocr_image(req: OcrRequest):
         elif req.region == "orders":
             order_details = parse_orders(text)
             codes = [o["code"] for o in order_details]
+        elif req.region in ("symptoms", "special"):
+            # 증상/특이증상은 텍스트 그대로 반환
+            pass
         else:
             codes = parse_dx(text)
 
