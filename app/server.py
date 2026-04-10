@@ -96,7 +96,7 @@ class OcrRequest(BaseModel):
     region: str = ""    # "dx" | "orders" | ""
 
 @app.post("/ocr")
-def ocr_image(req: OcrRequest):
+def do_ocr(req: OcrRequest):
     """base64 이미지 → OCR → 텍스트 + 파싱된 코드 반환"""
     try:
         from PIL import Image
@@ -107,10 +107,10 @@ def ocr_image(req: OcrRequest):
         text = ""
         if sys.platform == "win32":
             try:
-                from ocr.reader import ocr_image as win_ocr
-                text = win_ocr(img)
-            except Exception:
-                text = "[Windows OCR 실패]"
+                from ocr.reader import ocr_image
+                text = ocr_image(img)
+            except Exception as e:
+                text = f"[Windows OCR 실패: {e}]"
         else:
             text = "[OCR는 Windows에서만 동작]"
 
