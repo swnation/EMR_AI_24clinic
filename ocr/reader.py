@@ -19,9 +19,9 @@ def _is_windows():
 
 def _preprocess(image: Image.Image) -> Image.Image:
     """OCR 정확도를 위한 이미지 전처리"""
-    # 1. 2배 확대 (작은 텍스트 인식 개선)
+    # 1. 4배 확대 (크롭된 영역이라 충분히 커져야 OCR 정확도 확보)
     w, h = image.size
-    image = image.resize((w * 2, h * 2), Image.LANCZOS)
+    image = image.resize((w * 4, h * 4), Image.LANCZOS)
 
     # 2. 그레이스케일 변환
     image = image.convert("L")
