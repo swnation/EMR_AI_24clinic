@@ -1,5 +1,6 @@
 """
-Windows OCR (WinRT) 텍스트 추출 모듈
+Windows OCR 텍스트 추출 모듈
+winocr 패키지 사용 (Python 3.12+ 호환)
 PIL Image → 한국어 OCR → 텍스트
 """
 import asyncio
@@ -17,50 +18,27 @@ def _is_windows():
     return sys.platform == "win32"
 
 
-async def _ocr_winrt(image: Image.Image) -> str:
-    """Windows WinRT OCR (한국어, 별도 설치 불필요)"""
-    from winsdk.windows.media.ocr import OcrEngine
-    from winsdk.windows.globalization import Language
-    from winsdk.windows.graphics.imaging import (
-        SoftwareBitmap, BitmapPixelFormat, BitmapAlphaMode
-    )
-    from winsdk.windows.storage.streams import (
-        InMemoryRandomAccessStream, DataWriter
-    )
+async def _ocr_winocr(image: Image.Image) -> str:
+    """winocr 패키지로 Windows OCR (한국어)"""
+    import winocr
 
-    # PIL → BMP bytes
+    # PIL → PNG bytes
     buf = io.BytesIO()
-    image.save(buf, format="BMP")
-    bmp_bytes = buf.getvalue()
+    image.save(buf, format="PNG")
+    png_bytes = buf.getvalue()
 
-    # BMP → SoftwareBitmap
-    stream = InMemoryRandomAccessStream()
-    writer = DataWriter(stream)
-    writer.write_bytes(bmp_bytes)
-    await writer.store_async()
-    stream.seek(0)
-
-    decoder = await __import__(
-        'winsdk.windows.graphics.imaging', fromlist=['BitmapDecoder']
-    ).BitmapDecoder.create_async(stream)
-    bitmap = await decoder.get_software_bitmap_async()
-
-    # 한국어 OCR
-    lang = Language("ko")
-    engine = OcrEngine.try_create_from_language(lang)
-    if engine is None:
-        raise RuntimeError("한국어 OCR 엔진을 찾을 수 없습니다")
-
-    result = await engine.recognize_async(bitmap)
+    result = await winocr.recognize_png(png_bytes, lang="ko")
     return result.text
 
 
 def ocr_image(image: Image.Image) -> str:
     """이미지에서 텍스트 추출 (동기 래퍼)"""
     if _is_windows():
-        return asyncio.run(_ocr_winrt(image))
+        try:
+            return asyncio.run(_ocr_winocr(image))
+        except Exception as e:
+            return f"[Windows OCR 실패: {e}]"
     else:
-        # Windows가 아닌 환경에서는 더미 반환 (개발/테스트용)
         return "[OCR는 Windows에서만 동작합니다]"
 
 
@@ -73,7 +51,6 @@ def ocr_all(images: dict) -> dict:
 
 
 if __name__ == "__main__":
-    # 테스트: 캡처 파일에서 OCR
     import os
     captures_dir = "ocr/captures"
     if os.path.isdir(captures_dir):
