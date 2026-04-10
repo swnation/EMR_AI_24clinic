@@ -3,7 +3,6 @@ Windows OCR 텍스트 추출 모듈
 winocr 패키지 사용 (Python 3.12+ 호환)
 PIL Image → 한국어 OCR → 텍스트
 """
-import asyncio
 import sys
 import io
 
