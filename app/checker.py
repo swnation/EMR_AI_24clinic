@@ -141,13 +141,21 @@ def _check_antitussive(dx_set: set, order_set: set, patient_type: str, results: 
                 "6세미만 3종, 6세이상 2종까지. suda2는 카운팅 제외",
                 "소아 URI(만12세 미만).md")
 
-    # A-4. ac/erdo/drop 처방 시 필수 상병(j040/j0180/j209) 누락
+    # A-4. ac/erdo/drop → 비염(j303) 단독이면 삭감. 다른 호흡기 상병 필요
     if {"ac","erdo","drop"} & order_set:
-        if dx_set and not (dx_set & AC_REQUIRED_DX):
-            _append(results, "warn",
-                "ac/erdo → 후두염(j040), 부비동염(j0180), 기관지염(j209) 상병 필요",
-                "후두염/부비동염 사용 시 연결코드 기관지염 삭제해주기",
-                "인수인계_2026년3월.md")
+        has_resp_not_rhinitis = dx_set & (RESP_CODES - RHINITIS_DX)  # j303 제외한 호흡기 상병
+        if dx_set and not has_resp_not_rhinitis:
+            only_rhinitis = dx_set & RHINITIS_DX
+            if only_rhinitis:
+                _append(results, "err",
+                    "ac/erdo/drop + 비염(j303) 단독 → 삭감",
+                    "비염에 가래약 불가. j00/j060/j0390/j209 등 다른 호흡기 상병 추가 필요",
+                    "인수인계_2026년3월.md")
+            elif not any(c.startswith("j") for c in dx_set):
+                _append(results, "warn",
+                    "ac/erdo/drop → 호흡기 상병(J코드) 필요",
+                    "j00(감기)/j060(인후두염)/j0390(편도염)/j209(기관지염) 등",
+                    "인수인계_2026년3월.md")
 
     # A-5. umk 필수 상병(j209 기관지염) 누락
     if "umk" in order_set:
