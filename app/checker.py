@@ -1,9 +1,5 @@
-import json
 from typing import List, Dict
 from app import drug_db
-
-with open("rules/rules.json", encoding="utf-8") as f:
-    RULES = json.load(f)["rules"]
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 상수: drug_db에서 동적으로 가져옴

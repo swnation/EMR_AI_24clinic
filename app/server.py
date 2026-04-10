@@ -71,7 +71,8 @@ def template_detail(template_id: str):
 @app.get("/knowledge/{filename}")
 def get_knowledge(filename: str):
     """노션 파일 내용 반환"""
-    path = f"knowledge/{filename}"
+    filename = os.path.basename(filename)  # Path Traversal 방지
+    path = os.path.join("knowledge", filename)
     if os.path.exists(path):
         with open(path, encoding="utf-8") as f:
             return {"content": f.read()}
