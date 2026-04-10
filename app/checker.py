@@ -26,7 +26,7 @@ TAN_BANNED_DX = {"j22","j209"}
 
 # ── IM 주사제: drug_db에서 가져옴 ──
 IM_CODES = drug_db.im_codes()
-DEXA_REQUIRED_DX = {"j040","j303"}
+DEXA_REQUIRED_DX = {"j040","j303","l309","l500"}
 
 # ── 수액: drug_db에서 가져옴 ──
 IV_FLUID_CODES = drug_db.iv_fluid_codes() | {"3cefaiv","ampiiv","tamiiv","tyiv"}
@@ -112,12 +112,14 @@ def _append(results: list, level: str, message: str, sub: str = "", source: str 
 # [A] 진해거담제 룰
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 def _check_antitussive(dx_set: set, order_set: set, patient_type: str, results: list):
-    # A-1. 성인 진해거담제 2종 초과
+    # A-1. 성인 진해거담제 초과 (상기도 2종, 하기도 3종)
     if patient_type != "소아":
         used = order_set & ANTITUSSIVE_ADULT
-        if len(used) > 2:
+        lower_resp = dx_set & {"j22","j209"}
+        limit = 3 if lower_resp else 2
+        if len(used) > limit:
             _append(results, "err",
-                f"진해거담제 {len(used)}종 → 성인 2종까지만 보험",
+                f"진해거담제 {len(used)}종 → {'하기도 3종' if lower_resp else '상기도 2종'}까지만 보험",
                 f"사용 중: {', '.join(sorted(used))}. suda는 카운팅 제외",
                 "인수인계_2026년3월.md")
 
@@ -139,8 +141,8 @@ def _check_antitussive(dx_set: set, order_set: set, patient_type: str, results: 
                 "6세미만 3종, 6세이상 2종까지. suda2는 카운팅 제외",
                 "소아 URI(만12세 미만).md")
 
-    # A-4. ac/erdo 처방 시 필수 상병(j040/j0180/j209) 누락
-    if {"ac","erdo"} & order_set:
+    # A-4. ac/erdo/drop 처방 시 필수 상병(j040/j0180/j209) 누락
+    if {"ac","erdo","drop"} & order_set:
         if dx_set and not (dx_set & AC_REQUIRED_DX):
             _append(results, "warn",
                 "ac/erdo → 후두염(j040), 부비동염(j0180), 기관지염(j209) 상병 필요",
@@ -520,7 +522,7 @@ def _check_common(dx_set: set, order_set: set, dx: list, patient_type: str, resu
         results.append({
             "level": "warn",
             "message": "cd(만성질환관리료) → 관련 상병이 주상병 최상위에 있어야 함",
-            "sub": "고혈압/당뇨 등 만성질환 상병을 상병 목록 맨 위로",
+            "sub": "고혈압/당뇨/갑상선/수면제/편두통 등 만성질환 상병을 상병 목록 맨 위로",
             "source": "인수인계_2026년3월.md"
         })
 
@@ -544,8 +546,8 @@ def _check_common(dx_set: set, order_set: set, dx: list, patient_type: str, resu
             "source": "인수인계_2026년3월.md"
         })
 
-    # E-6. macpo/dom → r11(구역/구토) 필수, 5일 이상 삭감
-    if {"macpo","dom"} & order_set:
+    # E-6. mac/macpo/dom → r11(구역/구토) 필수, 5일 이상 삭감
+    if {"mac","macpo","dom"} & order_set:
         if dx_set and not (dx_set & MACPO_DOM_REQUIRED_DX):
             results.append({
                 "level": "err",
@@ -905,12 +907,14 @@ def _check_common(dx_set: set, order_set: set, dx: list, patient_type: str, resu
             "하나는 전액본인부담(삭감)",
             "고지혈증 이상지질혈증.md")
 
-    # N12. 항히스타민 2종 이상 → 1종만 보험
+    # N12. 항히스타민 2/3세대 2종 이상 → 삭감 (1세대+2/3세대는 허용)
+    gen1_ah = {"phen","uxsy"}  # 1세대
     used_ah = order_set & ANTIHISTAMINE_CODES
-    if len(used_ah) >= 2:
+    used_gen23 = used_ah - gen1_ah  # 2/3세대만
+    if len(used_gen23) >= 2:
         _append(results, "err",
-            f"항히스타민 {len(used_ah)}종 동시 → 1종만 보험: {', '.join(sorted(used_ah))}",
-            "나머지는 삭감. 하나는 f12 비급여",
+            f"항히스타민(2/3세대) {len(used_gen23)}종 동시 → 1종만 보험: {', '.join(sorted(used_gen23))}",
+            "1세대(phen)+2/3세대 병용은 가능. 2/3세대끼리 2종 삭감",
             "항히스타민제 정리.md")
 
     # N13. 항혈소판제 2종 동시 삭감
@@ -1102,6 +1106,135 @@ def _check_common(dx_set: set, order_set: set, dx: list, patient_type: str, resu
             "이물제거술 + dres(단순처치) → dres 삭감",
             "이물제거술에 드레싱 포함. 별도 청구 불가",
             "자주하는 지적질 모음 _ 네이버 카페.pdf")
+
+    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    # [F] 피드백 55개 전수 스캔 기반 추가 룰
+    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    # F1. r53(권태 및 피로) 보험 불가 (6회+ 반복)
+    if "r53" in dx_set:
+        _append(results, "err",
+            "r53(권태 및 피로) → 보험 청구 불가 상병",
+            "수액 보험 시 다른 증상 상병 필요. 비청구 또는 질환 상병으로 변경",
+            "피드백 2022~2025 반복")
+
+    # F2. 항생제 + j00(감기) 단독 → 변경 권장 (5회+ 반복)
+    if (order_set & ANTIBIOTICS) and "j00" in dx_set:
+        if not (dx_set & {"j060","j040","j0390","j0180","j209"}):
+            _append(results, "warn",
+                "항생제 + j00(감기) 단독 → j060(인후두염) 등으로 변경 권장",
+                "j00에 항생제 비권장 (병원 평가 불이익). j060/j0390/j0180/j209로",
+                "피드백 2022~2025 반복")
+
+    # F3. NSAIDs 2종 동시 삭감 (5회+ 반복)
+    used_nsaid_only = order_set & {"loxo","dexi","dexi4","dexisy","bru","dic","cereb","melox","d"}
+    if len(used_nsaid_only) >= 2:
+        _append(results, "err",
+            f"NSAIDs 2종 동시 삭감: {', '.join(sorted(used_nsaid_only))}",
+            "같은 계열(NSAIDs) 2종 동시 보험 불가. 하나는 f12 또는 semi/ty로 대체",
+            "피드백 2022~2025 반복")
+
+    # F4. 진해/거담제 + 호흡기 상병(J코드) 없음 (7회+ 반복)
+    resp_drugs = order_set & {"co","cosy","codsy","drop","erdo","ac","suda","syna10","syna15"}
+    if resp_drugs:
+        has_j = any(c.startswith("j") for c in dx_set)
+        if dx_set and not has_j:
+            _append(results, "err",
+                f"호흡기약({', '.join(sorted(resp_drugs))}) → J코드(호흡기 상병) 없음 → 삭감",
+                "co/erdo/drop/suda 등은 호흡기 상병(j00/j060/j209 등) 필요",
+                "피드백 2022~2025 반복")
+
+    # F5. 항히스타민 + 필수 상병 없음 (6회+ 반복)
+    used_antiH = order_set & {"bepo","olo","ceti","cetisy","fexo","levoceti","hls","keto","keto2"}
+    if used_antiH:
+        ah_ok_dx = {"j303","l309","l500","l501","l509","l239","b029","b02","h101"}
+        if dx_set and not (dx_set & ah_ok_dx):
+            _append(results, "warn",
+                f"항히스타민({', '.join(sorted(used_antiH))}) → 비염/피부염/알러지 상병 필요",
+                "j303(비염), l309(피부염), l500(두드러기), b029(대상포진) 중 하나",
+                "피드백 2022~2025 반복")
+
+    # F6. cipro + 방광염 → n12-3 신우신염 필요 (4회+ 반복)
+    if "cipro" in order_set and (dx_set & {"n300","n309","n390"}):
+        if not any(c.startswith("n12") for c in dx_set):
+            _append(results, "err",
+                "cipro + 방광염 1차 사용 → n12-3(신우신염) 상병 추가 필요",
+                "cipro는 2차 항생제. 방광염 1차 aug2 권장. cipro 시 신우신염 코드 필요",
+                "피드백 2022~2025 반복")
+
+    # F7. tra(트라마돌) 12세 미만 금기 (2회 반복)
+    if patient_type == "소아" and "tra" in order_set:
+        _append(results, "err",
+            "tra(트라마돌) → 12세 미만 사용 금기",
+            "소아 통증에는 ty/dexisy 사용",
+            "피드백 2022~2023")
+
+    # F8. tirop 필수 상병 (3회 반복)
+    if "tirop" in order_set:
+        tirop_ok = {"k297","k29","k290","k295","k296","a090","a084","a049","k30","k58","k580","k581"}
+        if dx_set and not (dx_set & tirop_ok):
+            _append(results, "warn",
+                "tirop → k297(위염)/a090(장염)/k30(소화불량) 등 상병 필요",
+                "", "피드백 2024~2025 반복")
+
+    # F9. trime 필수 상병 체크 (4회 반복) — TRIME_OK_DX 상수는 있었으나 체크 로직 없었음
+    if "trime" in order_set:
+        if dx_set and not (dx_set & TRIME_OK_DX):
+            _append(results, "warn",
+                "trime → k297(위염)/a090(장염)/r11(구역)/k30(소화불량)/k58(IBS) 상병 필요",
+                "trime은 범위 넓지만 식도염(k21)에는 삭감",
+                "피드백 2024~2025 반복")
+
+    # F10. 수액 단독(주사제 믹스 없음) 경고 (4회+ 반복)
+    iv_in_order = order_set & (IV_FLUID_CODES | {"mc","gw3","gw6","gw8","gw10","gw15","egw"})
+    im_in_order = order_set & IM_CODES
+    if iv_in_order and not im_in_order:
+        _append(results, "info",
+            "수액 단독 → 주사제(tra 등) 믹스 권장",
+            "치료 목적 증명 + 실비 분쟁 방지. URI는 tra 트라덱사 반반 믹스",
+            "피드백 2022~2025 반복")
+
+    # F11. bus + tra 동시 보험 불가 (3회 반복)
+    if "bus" in order_set and "tra" in order_set:
+        _append(results, "err",
+            "bus(부스코판) + tra(트라마돌) 둘 다 보험 → 삭감",
+            "tra → trab(비급여)로 변경",
+            "피드백 2024 반복")
+
+    # F12. r11 + k30 동시 불필요 (3회+ 반복)
+    gi_symptom_dx = dx_set & {"r11","r111","r113","k30"}
+    if len(gi_symptom_dx) >= 2:
+        _append(results, "info",
+            f"r11(구역)/k30(소화불량) 동시 불필요: {', '.join(sorted(gi_symptom_dx))}",
+            "mosa/levo는 셋 중 하나만, mac/macpo는 r11만 필요. 하나만 잡으세요",
+            "피드백 2022~2025 반복")
+
+    # F13. macpo 18세 미만 보험 불가
+    if patient_type == "소아" and "macpo" in order_set:
+        _append(results, "err",
+            "macpo → 18세 미만 보험 불가 (항암 후 구역만 인정)",
+            "macb(비급여) 또는 dom2(소아용)/trimesy로 변경",
+            "피드백 2024")
+
+    # F14. luka 필수 상병 (비염/천식) 체크
+    luka_codes = order_set & {"luka10","luka5","luka4","lukasy","lukabid"}
+    if luka_codes:
+        luka_ok = {"j303","j459","j459-1","j46"}
+        if dx_set and not (dx_set & luka_ok):
+            _append(results, "warn",
+                f"luka({', '.join(sorted(luka_codes))}) → j303(비염) 또는 j459(천식) 상병 필요",
+                "", "피드백 2024")
+
+    # F15. pd(프레드니솔론) 필수 상병
+    if "pd" in order_set:
+        pd_ok = {"j040","j303","l309","l500","l501","j459","j46"}
+        banned = dx_set & DEXA_PD_BANNED_DX
+        ok = dx_set & pd_ok
+        if dx_set and not ok and not banned:
+            _append(results, "warn",
+                "pd(프레드니솔론) → j040(후두염)/j303(비염)/l309(피부염) 등 상병 필요",
+                "감기/인후두염/편도염/기관지염에 pd 삭감. 보험 가능 상병 확인",
+                "피드백 2024~2025 반복")
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
