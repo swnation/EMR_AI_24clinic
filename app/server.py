@@ -133,6 +133,7 @@ def do_ocr(req: OcrRequest):
             "text": text,
             "codes": codes,
             "order_details": order_details,
+            "debug_lines": text.split('\n') if text else [],
         }
     except Exception as e:
         return {"text": "", "codes": [], "order_details": [], "error": str(e)}

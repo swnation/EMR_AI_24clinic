@@ -433,13 +433,15 @@ function setupPasteZone(zoneId, imgId, inputId, region) {
               input.value = data.text || '';
               zone.querySelector('.paste-text').textContent =
                 'OCR 완료 (' + (data.text || '').length + '자)';
-            } else if (data.codes && data.codes.length > 0) {
-              input.value = data.codes.join(' ');
-              zone.querySelector('.paste-text').textContent =
-                'OCR 완료: ' + data.codes.join(', ');
             } else {
-              zone.querySelector('.paste-text').textContent =
-                'OCR 텍스트: ' + (data.text || '인식 실패').substring(0, 80);
+              if (data.codes && data.codes.length > 0) {
+                input.value = data.codes.join(' ');
+              }
+              // 항상 OCR 원문 표시 (디버깅용)
+              zone.querySelector('.paste-text').innerHTML =
+                '<b>코드:</b> ' + (data.codes?.join(', ') || '없음') +
+                '<br><b>OCR원문:</b><br>' +
+                (data.text || '인식 실패').replace(/\n/g, '<br>').substring(0, 500);
             }
           } catch (err) {
             zone.classList.remove('loading');

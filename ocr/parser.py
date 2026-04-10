@@ -33,7 +33,8 @@ _load_drug_db()
 
 # ── 상병코드 패턴 ──
 # ICD-10 형식: 알파벳 + 숫자 (j00, j0390, k297, m545, e14 등)
-DX_PATTERN = re.compile(r'\b([a-zA-Z]\d{2,5}(?:-\d{1,2})?)\b')
+# \b 대신 lookaround 사용 — 한글/특수문자 옆에서도 매칭
+DX_PATTERN = re.compile(r'(?<![a-zA-Z])([a-zA-Z]\d{2,5}(?:-\d{1,2})?)(?!\d)', re.IGNORECASE)
 
 # ── 오더코드 패턴 ──
 # 영문 소문자 시작, 숫자 포함 가능 (aug2, loxo, ty325, 3cefa 등)
@@ -60,60 +61,47 @@ def parse_dx(text: str) -> List[str]:
 def parse_orders(text: str) -> List[Dict]:
     """
     오더 영역 텍스트에서 오더코드 + 용량/일수 추출
+    2가지 방식 병행:
+    1. 줄 단위 파싱 (표 형식)
+    2. 전체 텍스트에서 알려진 코드 스캔 (OCR이 줄을 깨뜨린 경우)
     반환: [{"code": "aug2", "dose": 3.0, "days": 3, "freq": 3}, ...]
     """
     if not text:
         return []
 
-    lines = text.strip().split('\n')
+    found_codes = set()
     result = []
 
+    # 방법 1: 줄 단위 파싱
+    lines = text.strip().split('\n')
     for line in lines:
         line = line.strip()
         if not line:
             continue
 
-        # 코드 추출 (첫 번째 영문 토큰)
-        tokens = line.split()
+        tokens = re.split(r'[\s\t|]+', line)
         code = None
         for t in tokens:
             t_lower = t.lower().strip()
-            # drug_db에 있는 코드인지 확인
             if t_lower in _drug_codes_set:
                 code = t_lower
                 break
-            # fuzzy 매칭 (score 85+)
-            if fuzz and process and len(t_lower) >= 2:
-                match = process.extractOne(
-                    t_lower, list(_drug_codes_set),
-                    scorer=fuzz.ratio, score_cutoff=85
-                )
-                if match:
-                    code = match[0]
-                    break
 
         if not code:
             continue
+        if code in found_codes:
+            continue
+        found_codes.add(code)
 
-        # 코드와 약품명 이후의 숫자만 용량으로 사용
-        # 코드 위치 이후 텍스트에서 한글 약품명을 건너뛴 뒤 숫자 추출
+        # 용량 추출 (코드 이후 숫자들)
         code_idx = line.lower().find(code)
         after_code = line[code_idx + len(code):] if code_idx >= 0 else line
-
-        # 한글 약품명 부분 건너뛰기 (한글+숫자+mg/ml 등 포함)
         after_name = re.sub(r'^[^\d]*(?:[\d]+(?:\.\d+)?(?:mg|ml|g|%|mcg)\S*\s*)', '', after_code, flags=re.IGNORECASE)
         if not after_name.strip():
             after_name = after_code
 
-        # 남은 부분에서 숫자 추출 (용량 일수 횟수)
         numbers = re.findall(r'(\d+\.?\d*)', after_name)
-        # 첫 번째 숫자가 약품명의 mg 숫자일 수 있으므로 필터링
-        # 순수 용량/일수/횟수 패턴: 보통 1~10 범위
-        clean_numbers = []
-        for n in numbers:
-            val = float(n)
-            if val <= 100:  # 100 이하만 용량/일수/횟수로 간주
-                clean_numbers.append(val)
+        clean_numbers = [float(n) for n in numbers if float(n) <= 100]
 
         dose = clean_numbers[0] if len(clean_numbers) > 0 else None
         days = int(clean_numbers[1]) if len(clean_numbers) > 1 else None
@@ -125,6 +113,25 @@ def parse_orders(text: str) -> List[Dict]:
             "days": days,
             "freq": freq,
         })
+
+    # 방법 2: 전체 텍스트에서 알려진 코드 직접 스캔 (줄 파싱이 놓친 것 보완)
+    # 2글자 이하 코드는 오탐 많으므로 줄 파싱에서 이미 찾은 경우만 허용
+    text_lower = text.lower()
+    for code in _drug_codes_set:
+        if code in found_codes:
+            continue
+        if len(code) < 3:
+            continue
+        # 텍스트에서 코드가 독립적으로 등장하는지 (앞뒤가 영문자가 아닌 경우)
+        pattern = r'(?<![a-z])' + re.escape(code) + r'(?![a-z])'
+        if re.search(pattern, text_lower):
+            found_codes.add(code)
+            result.append({
+                "code": code,
+                "dose": None,
+                "days": None,
+                "freq": None,
+            })
 
     return result
 
