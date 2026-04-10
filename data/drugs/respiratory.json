@@ -1,0 +1,93 @@
+{
+  "_description": "호흡기약 - 진해거담제, 항히스타민, LTRA, 비충혈제거제, 기관지확장제 등",
+  "_insurance_rule": "성인 상기도 진해거담제 2종, 소아 6세미만 3종/6세이상 2종. 같은 분류 병용 삭감",
+
+  "진해제_중추성": {
+    "_note": "cough suppressant. co+cosy 같은 성분 병용 삭감",
+    "co":    {"name": "코데날정", "generic": "dihydrocodeine복합", "form": "po", "age": "성인", "insurance_price": 37, "claim_code": "645701150"},
+    "cosy":  {"name": "코데날시럽", "generic": "dihydrocodeine복합", "form": "po_liquid", "age": "성인", "insurance_price": 200, "claim_code": "645702661", "unit": "mL"},
+    "codsy": {"name": "코대원에스시럽", "generic": "dihydrocodeine복합", "form": "po_liquid", "age": "소아", "insurance_price": 402, "claim_code": "671807171", "unit": "mL"},
+    "cough": {"name": "코푸시럽", "generic": "tipepidine+guaifenesin", "form": "po_liquid", "age": "소아", "insurance_price": 198, "claim_code": "642102282", "unit": "mL"}
+  },
+
+  "거담제": {
+    "_note": "expectorant. erdo+ac+drop 같은 분류 2종이상 삭감. ac/erdo는 j040/j0180/j209 필수",
+    "erdo":   {"name": "에르도스테인캡슐300mg", "generic": "erdosteine", "form": "po", "age": "성인", "insurance_price": 196, "claim_code": "669906660", "required_dx": ["j040","j0180","j209"]},
+    "ac":     {"name": "아세틸시스테인캡슐200mg", "generic": "acetylcysteine", "form": "po", "age": "성인", "insurance_price": 81, "claim_code": "669901590", "required_dx": ["j040","j0180","j209"]},
+    "drop":   {"name": "엘피진정", "generic": "levodropropizine+acetylcysteine", "form": "po", "age": "성인", "insurance_price": 135, "claim_code": "669902980"},
+    "ac2":    {"name": "이테란과립", "generic": "acetylcysteine", "form": "po_granule", "age": "소아", "insurance_price": 90, "claim_code": "628901141"},
+    "dropsy": {"name": "레드보르시럽", "generic": "levodropropizine", "form": "po_liquid", "age": "소아", "insurance_price": 18, "claim_code": "649102652", "unit": "mL"},
+    "ambsy":  {"name": "록솔씨시럽", "generic": "ambroxol", "form": "po_liquid", "age": "소아", "insurance_price": 13, "claim_code": "645700301", "unit": "mL"},
+    "umk":    {"name": "움카민시럽", "generic": "pelargonium sidoides", "form": "po_liquid", "age": "소아", "insurance_price": 28, "claim_code": "671703461", "unit": "mL",
+               "required_dx": ["j209"],
+               "dose_rule": {"1~6세": "9mL tid", "6~12세": "18mL tid"}}
+  },
+
+  "비충혈제거제": {
+    "_note": "decongestant. suda/suda2는 진해거담제 카운팅에서 제외",
+    "suda":   {"name": "슈다펜정", "generic": "pseudoephedrine", "form": "po", "age": "성인", "insurance_price": 30, "claim_code": "645700960", "excluded_from_antitussive_count": true},
+    "suda2":  {"name": "코비안에스시럽", "generic": "pseudoephedrine+triprolidine", "form": "po_liquid", "age": "소아", "insurance_price": 12, "claim_code": "645701161", "unit": "mL", "excluded_from_antitussive_count": true},
+    "ephed":  {"name": "리노에바스텔캡슐", "generic": "pseudoephedrine+chlorpheniramine", "form": "po", "age": "성인", "insurance_price": 300, "claim_code": "641900460"}
+  },
+
+  "항히스타민제": {
+    "_note": "antihistamine. 비염/알레르기/두드러기 등",
+    "phen":     {"name": "페니라민정2mg", "generic": "chlorpheniramine", "form": "po", "age": "성인", "insurance_price": 15, "claim_code": "642102570", "generation": 1},
+    "ceti":     {"name": "알레린정", "generic": "cetirizine", "form": "po", "age": "성인", "insurance_price": 210, "claim_code": "671702230", "generation": 2},
+    "cetisy":   {"name": "알레린액", "generic": "cetirizine", "form": "po_liquid", "age": "소아", "insurance_price": 39, "claim_code": "671702243", "unit": "mL", "generation": 2},
+    "levoceti": {"name": "세틴잘정5mg", "generic": "levocetirizine", "form": "po", "age": "성인", "insurance_price": 179, "claim_code": "670102300", "generation": 2},
+    "fexo":     {"name": "알러딘정", "generic": "fexofenadine", "form": "po", "age": "성인", "insurance_price": 226, "claim_code": "670604370", "generation": 2},
+    "olo":      {"name": "올로틴정5mg", "generic": "olopatadine", "form": "po", "age": "성인", "insurance_price": 153, "claim_code": "670102360", "generation": 2},
+    "uxsy":     {"name": "두드리진시럽", "generic": "hydroxyzine", "form": "po_liquid", "age": "소아", "insurance_price": 36, "claim_code": "645702771", "unit": "mL", "generation": 1},
+    "keto":     {"name": "케토티펜정", "generic": "ketotifen", "form": "po", "age": "성인", "insurance_price": 98, "claim_code": "645700770"},
+    "keto2":    {"name": "케토티펜시럽", "generic": "ketotifen", "form": "po_liquid", "age": "소아", "insurance_price": 43, "claim_code": "645700761", "unit": "mL"},
+    "hls":      {"name": "할록신정", "generic": "azelastine", "form": "po", "age": "성인", "insurance_price": 176, "claim_code": "645303040", "generation": 2}
+  },
+
+  "LTRA": {
+    "_note": "leukotriene receptor antagonist. 비염/천식. 천식 처방시 특정내역 필요",
+    "luka10":  {"name": "루카스트정10mg", "generic": "montelukast", "form": "po", "age": "성인(15세이상)", "insurance_price": 774, "claim_code": "670103340"},
+    "luka5":   {"name": "루카스트츄정5mg", "generic": "montelukast", "form": "po_chew", "age": "6~14세", "insurance_price": 658, "claim_code": "670103350"},
+    "luka4":   {"name": "싱귤라츄정4mg", "generic": "montelukast", "form": "po_chew", "age": "2~5세", "insurance_price": 591, "claim_code": "656004050"},
+    "lukabid": {"name": "씨투스정50mg", "generic": "zafirlukast", "form": "po", "age": "성인", "insurance_price": 526, "claim_code": "645702760"},
+    "lukasy":  {"name": "씨투스건조시럽", "generic": "zafirlukast", "form": "po_liquid", "age": "소아", "insurance_price": 519, "claim_code": "645702221", "unit": "mL"}
+  },
+
+  "기관지확장제": {
+    "_note": "B2 agonist. atock/atock2/pat1~3 같은 분류 동시 삭감. j209/j459 필요",
+    "atock":  {"name": "아토크정(판매중단→대체필요)", "generic": "tulobuterol", "form": "po", "age": "성인", "insurance_price": 0, "claim_code": "645700690", "required_dx": ["j209","j459"], "note": "품절"},
+    "atock2": {"name": "아토크건조시럽", "generic": "tulobuterol", "form": "po_liquid", "age": "소아", "insurance_price": 230, "claim_code": "645700681", "required_dx": ["j209","j459"]},
+    "pat1":   {"name": "호쿠나패취0.5mg", "generic": "tulobuterol", "form": "patch", "age": "소아(0.5~2세)", "insurance_price": 263, "claim_code": "656003960", "required_dx": ["j209","j459"], "excluded_from_antitussive_count": true},
+    "pat2":   {"name": "호쿠나패취1mg", "generic": "tulobuterol", "form": "patch", "age": "소아(3~8세)", "insurance_price": 394, "claim_code": "656003970", "required_dx": ["j209","j459"], "excluded_from_antitussive_count": true},
+    "pat3":   {"name": "호쿠나패취2mg", "generic": "tulobuterol", "form": "patch", "age": "성인(9세이상)", "insurance_price": 612, "claim_code": "656003980", "required_dx": ["j209","j459"], "excluded_from_antitussive_count": true},
+    "theo":   {"name": "에니츄라캡슐", "generic": "theophylline", "form": "po", "age": "성인", "insurance_price": 0, "claim_code": "649103790"}
+  },
+
+  "기타_호흡기": {
+    "tan":     {"name": "탄툼가글액", "generic": "benzydamine", "form": "gargle", "age": "all", "insurance_price": 1311, "claim_code": "645700791",
+                "banned_dx": ["j22","j209"], "note": "하기도 상병에 삭감, 상기도만 가능"},
+    "kina":    {"name": "알리나제정", "generic": "bromelain+trypsin", "form": "po", "age": "성인", "insurance_price": 0, "claim_code": "656003680",
+                "required_dx_prefix": "j", "note": "J코드(호흡기) 아니면 삭감", "excluded_from_antitussive_count": true},
+    "nasal":   {"name": "모메타손나잘스프레이", "generic": "mometasone", "form": "nasal_spray", "age": "all", "insurance_price": 9350, "claim_code": "645702351"},
+    "pel":     {"name": "브론키시럽", "generic": "pelargonium+thyme", "form": "po_liquid", "age": "소아", "insurance_price": 24, "claim_code": "657305761", "unit": "mL"},
+    "levt":    {"name": "레보투스시럽", "generic": "levodropropizine", "form": "po_liquid", "age": "소아", "insurance_price": 18, "claim_code": "642000192", "unit": "mL"},
+    "syna10":  {"name": "시네츄라시럽10mL", "generic": "ivy leaf extract", "form": "po_liquid", "age": "소아", "insurance_price": 187, "claim_code": "650203654", "unit": "mL"},
+    "syna15":  {"name": "시네츄라시럽15mL", "generic": "ivy leaf extract", "form": "po_liquid", "age": "성인", "insurance_price": 280, "claim_code": "650203656", "unit": "mL"}
+  },
+
+  "_antitussive_count_rules": {
+    "성인": {
+      "상기도": {"limit": 2, "counted": ["co","cosy","erdo","ac","drop"]},
+      "하기도_j22_j209": {"limit": 3, "counted": ["co","cosy","erdo","ac","drop"]}
+    },
+    "소아_6세미만": {"limit": 3, "counted": ["dropsy","ambsy","umk","ac2"]},
+    "소아_6세이상": {"limit": 2, "counted": ["dropsy","ambsy","umk","ac2","drop","ac","erdo"]},
+    "excluded_always": ["suda","suda2","kina","pat1","pat2","pat3","atock","atock2","theo"]
+  },
+
+  "_same_class_conflicts": [
+    {"codes": ["co","cosy","codsy","cough"], "class": "중추성진해제", "reason": "같은 성분/분류 병용 삭감"},
+    {"codes": ["erdo","ac","drop"], "class": "거담제(성인)", "reason": "같은 분류 2종이상 삭감"},
+    {"codes": ["atock","atock2","pat1","pat2","pat3"], "class": "B2 agonist", "reason": "같은 분류 동시 삭감"}
+  ]
+}

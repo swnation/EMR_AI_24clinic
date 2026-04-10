@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>EMR 체크 — 24clinic</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; background: #f5f5f5; font-size: 13px; }
+.container { max-width: 520px; margin: 0 auto; padding: 12px; }
+h1 { font-size: 15px; font-weight: 600; color: #333; margin-bottom: 10px; }
+
+/* 탭 */
+.tabs { display: flex; gap: 0; margin-bottom: 12px; border-bottom: 2px solid #e0e0e0; }
+.tab { padding: 8px 16px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; background: none; color: #888; border-bottom: 2px solid transparent; margin-bottom: -2px; font-family: inherit; }
+.tab.active { color: #2c5f9e; border-bottom-color: #2c5f9e; }
+.tab:hover { color: #555; }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* 카드 */
+.card { background: #fff; border-radius: 8px; border: 1px solid #e0e0e0; padding: 12px; margin-bottom: 10px; }
+label { font-size: 11px; color: #888; font-weight: 600; letter-spacing: .04em; display: block; margin-bottom: 5px; }
+input[type=text], select, textarea { width: 100%; padding: 7px 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; font-family: inherit; }
+input[type=text]:focus, select:focus, textarea:focus { outline: none; border-color: #4a90d9; }
+textarea { resize: vertical; min-height: 60px; }
+.hint { font-size: 11px; color: #aaa; margin-top: 4px; }
+.row { display: flex; gap: 8px; }
+.row > * { flex: 1; }
+
+/* 버튼 */
+.btn { width: 100%; padding: 10px; background: #2c5f9e; color: #fff; border: none; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; }
+.btn:hover { background: #1e4a80; }
+.btn-sm { padding: 6px 12px; font-size: 12px; width: auto; }
+.btn-outline { background: #fff; color: #2c5f9e; border: 1px solid #2c5f9e; }
+.btn-outline:hover { background: #f0f4fa; }
+.btn-green { background: #2e7d32; }
+.btn-green:hover { background: #1b5e20; }
+
+/* 결과 */
+.results { margin-top: 10px; }
+.ri { padding: 9px 12px; border-radius: 6px; margin-bottom: 6px; font-size: 13px; display: flex; gap: 8px; align-items: flex-start; }
+.ri-ok { background: #e8f5e9; color: #2e7d32; }
+.ri-warn { background: #fff8e1; color: #f57f17; }
+.ri-err { background: #ffebee; color: #c62828; }
+.ri-info { background: #e3f2fd; color: #1565c0; }
+.ico { font-size: 13px; flex-shrink: 0; font-weight: bold; }
+.sub { font-size: 11px; opacity: .75; margin-top: 2px; }
+.src { font-size: 10px; opacity: .5; margin-top: 2px; }
+
+/* 템플릿 */
+.tpl-group { margin-bottom: 16px; }
+.tpl-group-title { font-size: 12px; font-weight: 700; color: #2c5f9e; margin-bottom: 8px; padding-bottom: 4px; border-bottom: 1px solid #e8ecf1; }
+.tpl-item { background: #fff; border: 1px solid #e0e0e0; border-radius: 6px; padding: 10px 12px; margin-bottom: 8px; cursor: pointer; transition: border-color .15s; }
+.tpl-item:hover { border-color: #4a90d9; }
+.tpl-item.selected { border-color: #2c5f9e; background: #f0f4fa; }
+.tpl-name { font-weight: 600; font-size: 13px; }
+
+/* 미리보기 */
+.preview-area { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 14px; margin-top: 10px; }
+.preview-text { white-space: pre-wrap; line-height: 1.8; font-size: 12.5px; color: #333; min-height: 60px; }
+.field-row { display: flex; gap: 6px; align-items: center; margin-bottom: 6px; }
+.field-label { font-size: 11px; font-weight: 600; color: #666; min-width: 60px; text-align: right; }
+.field-input { flex: 1; padding: 5px 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 12px; font-family: inherit; }
+.copy-toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #333; color: #fff; padding: 8px 20px; border-radius: 20px; font-size: 13px; opacity: 0; transition: opacity .3s; pointer-events: none; z-index: 100; }
+.copy-toast.show { opacity: 1; }
+
+/* 상태표시 */
+.status { font-size: 11px; color: #999; text-align: center; margin-top: 8px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>EMR 체크 — 24시 열린의원</h1>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('check')">체크</button>
+    <button class="tab" onclick="switchTab('tpl')">차팅/양식</button>
+  </div>
+
+  <!-- ═══ 체크 탭 ═══ -->
+  <div id="panel-check" class="tab-panel active">
+    <div class="card">
+      <div class="row">
+        <div>
+          <label>환자 구분</label>
+          <select id="pt">
+            <option value="성인">성인</option>
+            <option value="소아">소아</option>
+          </select>
+        </div>
+        <div>
+          <label>증상 메모 (선택)</label>
+          <input type="text" id="symptoms" placeholder="c/s/r +/-/-">
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <label>상병코드 (쉼표 또는 공백 구분)</label>
+      <input type="text" id="dx" placeholder="예: j0390 j303 k297 i109">
+      <div class="hint">의사랑에서 복사 또는 직접 입력</div>
+    </div>
+
+    <div class="card">
+      <label>오더코드 (쉼표 또는 공백 구분)</label>
+      <input type="text" id="orders" placeholder="예: aug2 dexi loxo reba cd">
+    </div>
+
+    <button class="btn" onclick="runCheck()">스캔하기 (F12)</button>
+
+    <div class="results" id="results"></div>
+    <div class="status" id="check-status"></div>
+  </div>
+
+  <!-- ═══ 차팅/양식 탭 ═══ -->
+  <div id="panel-tpl" class="tab-panel">
+    <div class="card">
+      <label>카테고리</label>
+      <select id="tpl-cat" onchange="filterTemplates()">
+        <option value="">전체</option>
+        <option value="진료의뢰서">진료의뢰서</option>
+        <option value="진단서">진단서/소견서</option>
+        <option value="독감">독감</option>
+        <option value="기타">기타</option>
+        <option value="오더가이드">오더 가이드</option>
+      </select>
+    </div>
+
+    <div id="tpl-list"></div>
+
+    <!-- 선택된 템플릿 미리보기 -->
+    <div id="tpl-preview" style="display:none;">
+      <div class="preview-area">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+          <strong id="tpl-preview-title" style="font-size:13px;"></strong>
+          <button class="btn btn-sm btn-green" onclick="copyTemplate()">복사</button>
+        </div>
+        <div id="tpl-fields"></div>
+        <div class="preview-text" id="tpl-preview-text"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="copy-toast" id="toast">복사 완료</div>
+
+<script>
+/* ═══ 탭 전환 ═══ */
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  event.target.classList.add('active');
+  if (name === 'tpl' && !window._tplLoaded) loadTemplates();
+}
+
+/* ═══ 체크 기능 ═══ */
+function parse(str) {
+  return str.split(/[\s,]+/).map(s => s.trim()).filter(Boolean);
+}
+
+async function runCheck() {
+  const dx = parse(document.getElementById('dx').value);
+  const orders = parse(document.getElementById('orders').value);
+  const symptoms = document.getElementById('symptoms').value;
+  const pt = document.getElementById('pt').value;
+
+  if (!dx.length && !orders.length) {
+    document.getElementById('results').innerHTML =
+      '<div class="ri ri-info"><span class="ico">i</span><div>상병코드 또는 오더코드를 입력해주세요</div></div>';
+    return;
+  }
+
+  const resp = await fetch('/check', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ dx, orders, symptoms, patient_type: pt })
+  });
+
+  const data = await resp.json();
+  const ico = { err: '\u2715', warn: '!', info: 'i', ok: '\u2713' };
+  const cls = { err: 'ri-err', warn: 'ri-warn', info: 'ri-info', ok: 'ri-ok' };
+
+  const errCount = data.filter(r => r.level === 'err').length;
+  const warnCount = data.filter(r => r.level === 'warn').length;
+
+  document.getElementById('results').innerHTML = data.map(r => `
+    <div class="ri ${cls[r.level]}">
+      <span class="ico">${ico[r.level]}</span>
+      <div>
+        <div>${r.message}</div>
+        ${r.sub ? `<div class="sub">${r.sub}</div>` : ''}
+        ${r.source ? `<div class="src">${r.source}</div>` : ''}
+      </div>
+    </div>
+  `).join('');
+
+  const status = errCount > 0
+    ? `오류 ${errCount}건` + (warnCount ? `, 주의 ${warnCount}건` : '')
+    : warnCount > 0
+      ? `주의 ${warnCount}건`
+      : '이상 없음';
+  document.getElementById('check-status').textContent = `dx ${dx.length}건, orders ${orders.length}건 | ${status}`;
+}
+
+/* ═══ 템플릿 기능 ═══ */
+let allTemplates = [];
+let selectedTemplate = null;
+
+async function loadTemplates() {
+  const resp = await fetch('/templates');
+  allTemplates = await resp.json();
+  window._tplLoaded = true;
+  filterTemplates();
+}
+
+function filterTemplates() {
+  const cat = document.getElementById('tpl-cat').value;
+  const filtered = cat ? allTemplates.filter(t => t.category === cat) : allTemplates;
+
+  // 카테고리별 그룹
+  const groups = {};
+  filtered.forEach(t => {
+    if (!groups[t.category]) groups[t.category] = [];
+    groups[t.category].push(t);
+  });
+
+  let html = '';
+  for (const [cat, items] of Object.entries(groups)) {
+    html += `<div class="tpl-group"><div class="tpl-group-title">${cat}</div>`;
+    items.forEach(t => {
+      html += `<div class="tpl-item" onclick="selectTemplate('${t.id}')">
+        <span class="tpl-name">${t.name}</span>
+      </div>`;
+    });
+    html += '</div>';
+  }
+  document.getElementById('tpl-list').innerHTML = html;
+  document.getElementById('tpl-preview').style.display = 'none';
+  selectedTemplate = null;
+}
+
+function selectTemplate(id) {
+  const t = allTemplates.find(x => x.id === id);
+  if (!t) return;
+  selectedTemplate = t;
+
+  // 선택 상태 표시
+  document.querySelectorAll('.tpl-item').forEach(el => el.classList.remove('selected'));
+  event.currentTarget.classList.add('selected');
+
+  // 필드 입력 UI
+  let fieldsHtml = '';
+  if (t.fields && t.fields.length > 0) {
+    t.fields.forEach(f => {
+      fieldsHtml += `<div class="field-row">
+        <span class="field-label">${f}</span>
+        <input class="field-input" data-field="${f}" placeholder="${f}" oninput="updatePreview()">
+      </div>`;
+    });
+  }
+  document.getElementById('tpl-fields').innerHTML = fieldsHtml;
+  document.getElementById('tpl-preview-title').textContent = t.name;
+  document.getElementById('tpl-preview').style.display = 'block';
+  updatePreview();
+}
+
+function updatePreview() {
+  if (!selectedTemplate) return;
+  let text = selectedTemplate.template;
+  document.querySelectorAll('.field-input').forEach(el => {
+    const field = el.dataset.field;
+    const val = el.value || `{${field}}`;
+    text = text.replaceAll(`{${field}}`, val);
+  });
+  document.getElementById('tpl-preview-text').textContent = text;
+}
+
+function copyTemplate() {
+  const text = document.getElementById('tpl-preview-text').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const toast = document.getElementById('toast');
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 1500);
+  });
+}
+
+/* ═══ 키보드 ═══ */
+document.addEventListener('keydown', e => {
+  if (e.key === 'F12') { e.preventDefault(); runCheck(); }
+  if (e.key === 'Enter' && document.getElementById('panel-check').classList.contains('active')) {
+    runCheck();
+  }
+});
+</script>
+</body>
+</html>

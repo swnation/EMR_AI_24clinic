@@ -1,0 +1,1 @@
+# 혈관 미주신경성 실신 vasovagal syncope

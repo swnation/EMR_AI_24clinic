@@ -1,0 +1,106 @@
+{
+  "_description": "주사제(IM/IV) 및 수액",
+  "_im_rule": "IM 2종 이상 → 추가분은 -b 코드 사용 (디클로페낙 d 제외). IM/IV 구분없이 모두 IM으로 등록",
+
+  "IM_진통소염": {
+    "_note": "tra+dexa 반반(트라덱사) 기본조합. d는 38도이상 고열 or 근골격통증",
+    "tra":   {"name": "트라마돌주50mg", "generic": "tramadol", "form": "im", "insurance_price": 270, "claim_code": "642300341"},
+    "trab":  {"name": "트라마돌주50mg(-b)", "generic": "tramadol", "form": "im", "insurance_price": 0, "claim_code": "642300340", "is_b_code": true},
+    "d":     {"name": "디클로페낙주", "generic": "diclofenac", "form": "im", "insurance_price": 565, "claim_code": "650500521",
+              "note": "b코드 불필요(디클로페낙 제외 규칙)"},
+    "di":    {"name": "디클로페낙주(비급여)", "generic": "diclofenac", "form": "im", "insurance_price": 0, "claim_code": "650500520"},
+    "bus":   {"name": "부스코판주", "generic": "hyoscine", "form": "im", "insurance_price": 396, "claim_code": "650500991"},
+    "busb":  {"name": "부스코판주(-b)", "generic": "hyoscine", "form": "im", "insurance_price": 0, "claim_code": "650500990", "is_b_code": true}
+  },
+
+  "IM_항히스타민_스테로이드": {
+    "pheni":  {"name": "클로르페니라민주", "generic": "chlorpheniramine", "form": "im", "insurance_price": 147, "claim_code": "670603013"},
+    "phenib": {"name": "클로르페니라민주(-b)", "generic": "chlorpheniramine", "form": "im", "insurance_price": 0, "claim_code": "670603010", "is_b_code": true},
+    "dexa":   {"name": "덱사메타손주", "generic": "dexamethasone", "form": "im", "insurance_price": 222, "claim_code": "683100393",
+               "required_dx": ["j040","j303","l309","l500"],
+               "banned_dx": ["j00","j060","j0390","j209"],
+               "note": "감기/인후두염/편도염/기관지염에 삭감. 후두염/비염/피부염만 보험"},
+    "dexab":  {"name": "덱사메타손주(-b)", "generic": "dexamethasone", "form": "im", "insurance_price": 0, "claim_code": "683100390", "is_b_code": true}
+  },
+
+  "IM_항생제": {
+    "genta":  {"name": "겐타마이신주80mg", "generic": "gentamicin", "form": "im", "insurance_price": 348, "claim_code": "648501841"},
+    "gentab": {"name": "겐타마이신주(-b)", "generic": "gentamicin", "form": "im", "insurance_price": 0, "claim_code": "683100121", "is_b_code": true},
+    "linco":  {"name": "린코마이신주600mg", "generic": "lincomycin", "form": "im", "insurance_price": 500, "claim_code": "683100481"},
+    "lincob": {"name": "린코마이신주(-b)", "generic": "lincomycin", "form": "im", "insurance_price": 0, "claim_code": "683100480", "is_b_code": true}
+  },
+
+  "IM_기타": {
+    "mac":    {"name": "메토클로프라미드주", "generic": "metoclopramide", "form": "im", "insurance_price": 227, "claim_code": "650500091"},
+    "macb":   {"name": "메토클로프라미드주(-b)", "generic": "metoclopramide", "form": "im", "insurance_price": 0, "claim_code": "642701340", "is_b_code": true},
+    "tr":     {"name": "티램주", "generic": "dimenhydrinate", "form": "im", "insurance_price": 429, "claim_code": "648503791"},
+    "trb":    {"name": "티램주(-b)", "generic": "dimenhydrinate", "form": "im", "insurance_price": 0, "claim_code": "648503790", "is_b_code": true},
+    "ambi":   {"name": "암브록솔주", "generic": "ambroxol", "form": "im", "insurance_price": 300, "claim_code": "648500581"},
+    "ambib":  {"name": "암브록솔주(-b)", "generic": "ambroxol", "form": "im", "insurance_price": 0, "claim_code": "645900881", "is_b_code": true},
+    "epi":    {"name": "에피네프린주", "generic": "epinephrine", "form": "im", "insurance_price": 330, "claim_code": "645100741", "note": "아나필락시스 응급"}
+  },
+
+  "IV_수액_기본": {
+    "ns":     {"name": "NS250kit", "generic": "normal saline 250mL", "form": "iv", "insurance_price": 0, "claim_code": "672900360"},
+    "ns110":  {"name": "NS110cc", "generic": "normal saline 110mL", "form": "iv", "insurance_price": 0, "claim_code": "678900972"},
+    "mc":     {"name": "마이어스칵테일", "generic": "myers cocktail", "form": "iv", "insurance_price": 0, "claim_code": null, "note": "비급여 영양수액"}
+  },
+
+  "IV_영양수액": {
+    "_note": "비급여",
+    "gw6":    {"name": "헬파워솔주250mL", "generic": "amino acid+glucose", "form": "iv", "insurance_price": 0, "claim_code": "644703630"},
+    "gw8":    {"name": "슈어로솔주250mL", "generic": "amino acid+glucose", "form": "iv", "insurance_price": 0, "claim_code": "644700060"},
+    "gw10":   {"name": "브레노솔주250mL", "generic": "amino acid+glucose", "form": "iv", "insurance_price": 0, "claim_code": "644703640"},
+    "gw15":   {"name": "위너프페리주", "generic": "amino acid+glucose", "form": "iv", "insurance_price": 0, "claim_code": null},
+    "gw3":    {"name": "뉴트리헥스주", "generic": "amino acid+glucose", "form": "iv", "insurance_price": 0, "claim_code": null},
+    "egw":    {"name": "디펩티벤주50mL", "generic": "alanyl-glutamine", "form": "iv", "insurance_price": 0, "claim_code": "650900121"}
+  },
+
+  "IV_항생제": {
+    "3cefaiv": {"name": "세프트리악손주1g", "generic": "ceftriaxone", "form": "iv", "insurance_price": 0, "claim_code": "645900660"},
+    "ampiiv":  {"name": "썰바신주", "generic": "ampicillin/sulbactam", "form": "iv", "insurance_price": 0, "claim_code": null},
+    "ppiiv":   {"name": "판타졸주사", "generic": "pantoprazole IV", "form": "iv", "insurance_price": 3569, "claim_code": "645903151"}
+  },
+
+  "IV_비타민_영양": {
+    "_note": "비급여 주사",
+    "b1":     {"name": "비타민B1주", "generic": "thiamine", "form": "iv", "insurance_price": 0, "claim_code": "670601060"},
+    "b5":     {"name": "비타모주", "generic": "dexpanthenol", "form": "iv", "insurance_price": 0, "claim_code": "670601120"},
+    "b6":     {"name": "피리독신주", "generic": "pyridoxine", "form": "iv", "insurance_price": 0, "claim_code": "670603640"},
+    "b12":    {"name": "리코발라민주", "generic": "hydroxocobalamin", "form": "iv", "insurance_price": 0, "claim_code": "670602630"},
+    "c":      {"name": "메리트씨주사", "generic": "ascorbic acid", "form": "iv", "insurance_price": 0, "claim_code": "670600790"},
+    "vitc":   {"name": "메리트씨주사", "generic": "ascorbic acid", "form": "iv", "insurance_price": 0, "claim_code": "670600790"},
+    "vitad":  {"name": "메리트디주", "generic": "cholecalciferol", "form": "im", "insurance_price": 0, "claim_code": null},
+    "bcom":   {"name": "판비콤프주", "generic": "B-complex", "form": "iv", "insurance_price": 0, "claim_code": "645102410"},
+    "blue":   {"name": "멀티블루5주", "generic": "multivitamin", "form": "iv", "insurance_price": 0, "claim_code": "641501160"},
+    "mg":     {"name": "마그네슘주10%", "generic": "magnesium sulfate", "form": "iv", "insurance_price": 0, "claim_code": "670600670"},
+    "sele":   {"name": "셀레나제주", "generic": "selenium", "form": "iv", "insurance_price": 0, "claim_code": "674800020"}
+  },
+
+  "IV_기타_비급여": {
+    "gam":    {"name": "히시파겐씨주", "generic": "glycyrrhizin", "form": "iv", "insurance_price": 0, "claim_code": "643603410", "note": "간기능"},
+    "gluta":  {"name": "루치온주", "generic": "glutathione", "form": "iv", "insurance_price": 0, "claim_code": null, "note": "해독/미백"},
+    "thioc":  {"name": "신델라주", "generic": "thioctic acid", "form": "iv", "insurance_price": 0, "claim_code": "669905781", "note": "당뇨신경병증"},
+    "pla":    {"name": "라이넥", "generic": "placenta extract", "form": "iv", "insurance_price": 0, "claim_code": "681100020", "note": "피로회복"},
+    "mels":   {"name": "멜스몬주", "generic": "placenta extract", "form": "im", "insurance_price": 0, "claim_code": "674000020", "note": "갱년기"},
+    "ginkoi": {"name": "진코발주", "generic": "ginkgo biloba", "form": "iv", "insurance_price": 0, "claim_code": "670601940"},
+    "thymo":  {"name": "싸이모신알파1주", "generic": "thymosin alpha-1", "form": "im", "insurance_price": 0, "claim_code": "681100411", "note": "면역"},
+    "aci":    {"name": "뮤라틱주사", "generic": "acetylcysteine IV", "form": "iv", "insurance_price": 0, "claim_code": "670600870"}
+  },
+
+  "_im_b_code_pairs": {
+    "_note": "IM 2종이상 시 추가분은 -b코드. d(디클로페낙)만 예외로 b코드 불필요",
+    "pairs": [
+      {"base": "tra", "b": "trab"},
+      {"base": "bus", "b": "busb"},
+      {"base": "pheni", "b": "phenib"},
+      {"base": "dexa", "b": "dexab"},
+      {"base": "genta", "b": "gentab"},
+      {"base": "linco", "b": "lincob"},
+      {"base": "mac", "b": "macb"},
+      {"base": "tr", "b": "trb"},
+      {"base": "ambi", "b": "ambib"}
+    ],
+    "exception": ["d", "di"]
+  }
+}

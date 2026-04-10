@@ -1,0 +1,86 @@
+{
+  "_description": "항생제, 항바이러스제, 항진균제",
+  "_insurance_rule": "1차기관 항생제 2종 동시 보험 무조건 삭감. 하나는 f12 비급여",
+
+  "페니실린계": {
+    "aug":    {"name": "아목클정375mg", "generic": "amoxicillin/clavulanate", "form": "po", "age": "성인", "insurance_price": 300, "claim_code": "669905950"},
+    "aug2":   {"name": "아목클정625mg", "generic": "amoxicillin/clavulanate", "form": "po", "age": "성인", "insurance_price": 483, "claim_code": "669905960"},
+    "augsy":  {"name": "아목클시럽", "generic": "amoxicillin/clavulanate", "form": "po_liquid", "age": "소아", "insurance_price": 69, "claim_code": "669906001", "unit": "mL"},
+    "pasy":   {"name": "파목신시럽", "generic": "amoxicillin", "form": "po_liquid", "age": "소아", "insurance_price": 30, "claim_code": "642703341", "unit": "mL"}
+  },
+
+  "세팔로스포린계": {
+    "cefa":    {"name": "세파클러캡슐250mg", "generic": "cefaclor(2세대)", "form": "po", "age": "성인", "insurance_price": 438, "claim_code": "669902150"},
+    "cefa1":   {"name": "세프라딘캡슐500mg", "generic": "cephradine(1세대)", "form": "po", "age": "성인", "insurance_price": 205, "claim_code": "669901920"},
+    "cefasy":  {"name": "세파클러건조시럽", "generic": "cefaclor(2세대)", "form": "po_liquid", "age": "소아", "insurance_price": 63, "claim_code": "694002011", "unit": "mL"},
+    "3cefa":   {"name": "세픽심정100mg", "generic": "cefixime(3세대po)", "form": "po", "age": "성인", "insurance_price": 491, "claim_code": "670607790"},
+    "3cefasy": {"name": "세픽심건조시럽", "generic": "cefixime(3세대po)", "form": "po_liquid", "age": "소아", "insurance_price": 88, "claim_code": "670607811", "unit": "mL"},
+    "3cefaiv": {"name": "세프트리악손주1g", "generic": "ceftriaxone(3세대iv)", "form": "iv", "age": "성인", "insurance_price": 0, "claim_code": "645900660"}
+  },
+
+  "마크로라이드계": {
+    "clari":   {"name": "클래리트로마이신정250mg", "generic": "clarithromycin", "form": "po", "age": "성인", "insurance_price": 865, "claim_code": "669906310"},
+    "clari2":  {"name": "클래마신정500mg", "generic": "clarithromycin", "form": "po", "age": "성인", "insurance_price": 1291, "claim_code": "669906850"},
+    "clarisy": {"name": "클래리건조시럽", "generic": "clarithromycin", "form": "po_liquid", "age": "소아", "insurance_price": 100, "claim_code": "643502671", "unit": "mL"},
+    "azi":     {"name": "지트로신건조시럽", "generic": "azithromycin", "form": "po_liquid", "age": "소아", "insurance_price": 195, "claim_code": "670102341", "unit": "mL"}
+  },
+
+  "퀴놀론계": {
+    "_note": "소아 quinolone 금기(ERR). cipro 방광염 1차 사용시 n12-3 신우신염 상병 필요",
+    "cipro":  {"name": "시프로플록사신정250mg", "generic": "ciprofloxacin", "form": "po", "age": "성인", "insurance_price": 444, "claim_code": "649102400",
+               "pediatric_contraindicated": true,
+               "uti_note": "방광염 1차로 쓸 때 n12-3 신우신염 상병 추가 필요"},
+    "oflo":   {"name": "레바록스정100mg", "generic": "ofloxacin", "form": "po", "age": "성인", "insurance_price": 482, "claim_code": "670100250",
+               "pediatric_contraindicated": true}
+  },
+
+  "기타_항생제": {
+    "doxy":   {"name": "독시사이클린정100mg", "generic": "doxycycline", "form": "po", "age": "성인", "insurance_price": 145, "claim_code": "661901020"},
+    "roxi":   {"name": "록시스로마이신정", "generic": "roxithromycin", "form": "po", "age": "성인", "insurance_price": 374, "claim_code": "670600600"},
+    "linco":  {"name": "린코마이신주600mg", "generic": "lincomycin", "form": "im", "age": "성인", "insurance_price": 500, "claim_code": "683100481"},
+    "ampiiv": {"name": "썰바신주", "generic": "ampicillin/sulbactam", "form": "iv", "age": "성인", "insurance_price": 0, "claim_code": null}
+  },
+
+  "항바이러스제_헤르페스": {
+    "acy":    {"name": "아시클로버정", "generic": "acyclovir", "form": "po", "age": "성인", "insurance_price": 468, "claim_code": "670100960"},
+    "valaci": {"name": "발라시클로버정500mg", "generic": "valacyclovir", "form": "po", "age": "성인", "insurance_price": 1187, "claim_code": "654304370"},
+    "acyc":   {"name": "아시클로버연고", "generic": "acyclovir", "form": "external", "age": "all", "insurance_price": 3216, "claim_code": "670100954"}
+  },
+
+  "항바이러스제_인플루엔자": {
+    "_note": "j111(인플루엔자) 상병 필수. 발증 48시간 이내",
+    "tami75":  {"name": "타미플루캡슐75mg", "generic": "oseltamivir", "form": "po", "age": "성인", "insurance_price": 1471, "claim_code": "649103110",
+                "required_dx": ["j111","j111-1","j09","j10","j11"]},
+    "tami30":  {"name": "타미플루캡슐30mg", "generic": "oseltamivir", "form": "po", "age": "소아", "insurance_price": 0, "claim_code": "649103460",
+                "required_dx": ["j111","j111-1","j09","j10","j11"]},
+    "tami45":  {"name": "타미플루캡슐45mg", "generic": "oseltamivir", "form": "po", "age": "소아", "insurance_price": 0, "claim_code": "649103450",
+                "required_dx": ["j111","j111-1","j09","j10","j11"]},
+    "tamisy":  {"name": "타미플루현탁용분말", "generic": "oseltamivir", "form": "po_liquid", "age": "소아", "insurance_price": 148, "claim_code": "643307831", "unit": "mL",
+                "required_dx": ["j111","j111-1","j09","j10","j11"]},
+    "tamipow": {"name": "타미플루현탁용분말6mg/mL", "generic": "oseltamivir", "form": "po_liquid", "age": "소아", "insurance_price": 0, "claim_code": "656004881", "unit": "mL",
+                "required_dx": ["j111","j111-1","j09","j10","j11"]},
+    "tamiiv":  {"name": "페라미플루주", "generic": "peramivir", "form": "iv", "age": "all", "insurance_price": 0, "claim_code": "643604610",
+                "required_dx": ["j111","j111-1","j09","j10","j11"]}
+  },
+
+  "항진균제": {
+    "fluco":  {"name": "플루코나졸캡슐", "generic": "fluconazole", "form": "po", "age": "성인", "insurance_price": 1784, "claim_code": "644002010"},
+    "itraco": {"name": "이트라코나졸정", "generic": "itraconazole", "form": "po", "age": "성인", "insurance_price": 1078, "claim_code": "669905850"},
+    "terbi":  {"name": "테르비나핀정", "generic": "terbinafine", "form": "po", "age": "성인", "insurance_price": 370, "claim_code": "694000580"},
+    "terbic": {"name": "테르비나핀겔", "generic": "terbinafine", "form": "external", "age": "all", "insurance_price": 3765, "claim_code": "671701521"},
+    "nizo":   {"name": "니조랄액", "generic": "ketoconazole", "form": "external", "age": "all", "insurance_price": 0, "claim_code": null},
+    "albenda": {"name": "알벤다졸정400mg", "generic": "albendazole", "form": "po", "age": "성인", "insurance_price": 0, "claim_code": "698000140"}
+  },
+
+  "_viral_dx_antibiotics_conflict": {
+    "viral_dx": ["j111","j111-1","b084","b08","b01","b019"],
+    "rule": "바이럴 상병(인플루엔자, 수족구, 수두)에 항생제 삭감",
+    "level": "ERR"
+  },
+
+  "_rhinitis_antibiotics_conflict": {
+    "rhinitis_dx": ["j303"],
+    "rule": "비염(j303) 단독 상병에 항생제 삭감",
+    "level": "WARN"
+  }
+}
