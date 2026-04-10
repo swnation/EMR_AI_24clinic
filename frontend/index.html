@@ -471,7 +471,9 @@ async function runCheck() {
   const dx = parse(document.getElementById('dx').value);
   const orders = parse(document.getElementById('orders').value);
   const symptoms = document.getElementById('symptoms').value;
+  const special = document.getElementById('special').value;
   const pt = document.getElementById('pt').value;
+  const bw = document.getElementById('bw').value;
 
   if (!dx.length && !orders.length) {
     document.getElementById('results').innerHTML =
@@ -479,10 +481,20 @@ async function runCheck() {
     return;
   }
 
+  // 특이증상에서 소아 자동 감지
+  let patientType = pt;
+  if (special && /소아|ped|개월|세\s|아이/.test(special.toLowerCase())) {
+    patientType = '소아';
+  }
+
   const resp = await fetch('/check', {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({ dx, orders, symptoms, patient_type: pt })
+    body: JSON.stringify({
+      dx, orders,
+      symptoms: symptoms + (special ? '\n[특이증상] ' + special : ''),
+      patient_type: patientType
+    })
   });
 
   const data = await resp.json();
