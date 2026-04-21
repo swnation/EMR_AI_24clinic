@@ -45,8 +45,8 @@ def _preprocess_heavy(image: Image.Image) -> Image.Image:
 
 # ── 현재 파이프라인에서 사용할 전처리 ──
 # 비교 실험 결과 좋은 쪽으로 이 한 줄만 바꾸면 됨.
-_preprocess = _preprocess_minimal
-# _preprocess = _preprocess_heavy
+#_preprocess = _preprocess_minimal
+_preprocess = _preprocess_heavy
 
 
 # =========================================================
