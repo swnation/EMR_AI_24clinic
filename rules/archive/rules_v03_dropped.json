@@ -1,0 +1,28 @@
+{
+  "schema_version": "0.3",
+  "archived_at": "2026-04-25",
+  "archived_by_session": 5,
+  "decision_doc": "rules-v03-reclassification-final",
+  "global_reason": "v1 excludes claim automation and payer-only warnings. This file stores classification metadata for dropped legacy rules.",
+  "note": "For full original legacy rule objects, run scripts/session5_migrate_rules_v3.py against rules.json v0.3 before replacing it with v1. The uploaded Claude artifact contains the full generated archive.",
+  "dropped_rules": [
+    {"original_rule_id": "adult_antitussive_over2", "classification": "drop", "drop_category": "claim_automation", "drop_reason": "'2종까지만 보험' = 삭감 기준. 임상 안전 이슈 아님.", "reviewed_by": "붕쌤", "batch2_candidate": false, "latent_safety_candidate": false, "payer_notice_candidate": false},
+    {"original_rule_id": "adult_sputum_dup", "classification": "drop", "drop_category": "claim_automation", "drop_reason": "'f12 비급여 처리' = 청구 해결법.", "reviewed_by": "붕쌤", "batch2_candidate": false, "latent_safety_candidate": false, "payer_notice_candidate": false},
+    {"original_rule_id": "ped_antitussive_over", "classification": "drop", "drop_category": "batch2_redesign", "drop_reason": "보험 기준. 소아 polypharmacy 경고는 Batch 2에서 별도 safety rule로 재설계 가능.", "reviewed_by": "붕쌤", "batch2_candidate": true, "latent_safety_candidate": false, "payer_notice_candidate": false, "note": "소아 다제병용 safety rule로 재설계 검토."},
+    {"original_rule_id": "ac_erdo_required_dx", "classification": "drop", "drop_category": "claim_automation", "drop_reason": "상병 누락 경고. 차트 수정으로 해결.", "reviewed_by": "붕쌤", "batch2_candidate": false, "latent_safety_candidate": false, "payer_notice_candidate": false},
+    {"original_rule_id": "umk_required_dx", "classification": "drop", "drop_category": "claim_automation", "drop_reason": "상병 누락 경고. 차트 수정으로 해결.", "reviewed_by": "붕쌤", "batch2_candidate": false, "latent_safety_candidate": false, "payer_notice_candidate": false},
+    {"original_rule_id": "umk_dose", "classification": "drop", "drop_category": "superseded_by_new_rule", "drop_reason": "Rule-Pediatric-Formulation-Dose가 umk를 대체. 1세 미만은 별도 급여 이슈.", "reviewed_by": "붕쌤", "batch2_candidate": false, "latent_safety_candidate": false, "payer_notice_candidate": true, "note": "1세 미만 umk는 의학적 금기가 아니라 급여/허가 용법용량 인정 범위 이슈."},
+    {"original_rule_id": "tan_lower_resp", "classification": "drop", "drop_category": "claim_automation", "drop_reason": "'1달 100ml 보험' = 청구 제한.", "reviewed_by": "붕쌤", "batch2_candidate": false, "latent_safety_candidate": false, "payer_notice_candidate": false},
+    {"original_rule_id": "atock_pat_dx", "classification": "drop", "drop_category": "claim_automation", "drop_reason": "상병 누락 경고.", "reviewed_by": "붕쌤", "batch2_candidate": false, "latent_safety_candidate": false, "payer_notice_candidate": false},
+    {"original_rule_id": "loxo_resp", "classification": "drop", "drop_category": "claim_automation", "drop_reason": "'근골격계 상병 추가 필요' = 삭감 회피.", "reviewed_by": "붕쌤", "batch2_candidate": false, "latent_safety_candidate": false, "payer_notice_candidate": false},
+    {"original_rule_id": "inj_2types", "classification": "drop", "drop_category": "claim_automation", "drop_reason": "'-b 비급여 코드' = 청구.", "reviewed_by": "붕쌤", "batch2_candidate": false, "latent_safety_candidate": false, "payer_notice_candidate": false},
+    {"original_rule_id": "dexa_required_dx", "classification": "drop", "drop_category": "claim_automation", "drop_reason": "상병 누락 경고.", "reviewed_by": "붕쌤", "batch2_candidate": false, "latent_safety_candidate": false, "payer_notice_candidate": false},
+    {"original_rule_id": "genta_resp_ban", "classification": "drop", "drop_category": "claim_automation", "drop_reason": "v1 scope에서는 청구/적응증 단독 경고 제외. 원내 실수 케이스 드물다는 판단.", "reviewed_by": "붕쌤", "batch2_candidate": true, "latent_safety_candidate": true, "payer_notice_candidate": false, "revisit_condition": "gentamicin respiratory-only 처방 또는 near-miss 발생 시 safety rule 승격 검토."},
+    {"original_rule_id": "tamiflu_dx", "classification": "drop", "drop_category": "claim_automation", "drop_reason": "상병 누락 경고.", "reviewed_by": "붕쌤", "batch2_candidate": false, "latent_safety_candidate": false, "payer_notice_candidate": false},
+    {"original_rule_id": "tamiflu_prophylaxis", "classification": "drop", "drop_category": "claim_automation", "drop_reason": "'f12 비보험, 특정내역 삭제' = 청구.", "reviewed_by": "붕쌤", "batch2_candidate": false, "latent_safety_candidate": false, "payer_notice_candidate": false},
+    {"original_rule_id": "glia8_age", "classification": "drop", "drop_category": "payer_rule", "drop_reason": "60세 미만 본인부담 80% 선별급여. 의학적 금기 아님.", "reviewed_by": "붕쌤", "batch2_candidate": false, "latent_safety_candidate": false, "payer_notice_candidate": true, "note": "향후 payer_notice plane 구현 시 적용 후보."},
+    {"original_rule_id": "cd_order", "classification": "drop", "drop_category": "claim_automation", "drop_reason": "상병 순서 = 청구.", "reviewed_by": "붕쌤", "batch2_candidate": false, "latent_safety_candidate": false, "payer_notice_candidate": false},
+    {"original_rule_id": "z_code_primary", "classification": "drop", "drop_category": "claim_automation", "drop_reason": "주상병 순서 = 청구.", "reviewed_by": "붕쌤", "batch2_candidate": false, "latent_safety_candidate": false, "payer_notice_candidate": false},
+    {"original_rule_id": "antibiotics_no_dx", "classification": "drop", "drop_category": "claim_automation", "drop_reason": "상병 누락 경고.", "reviewed_by": "붕쌤", "batch2_candidate": false, "latent_safety_candidate": false, "payer_notice_candidate": false}
+  ]
+}
