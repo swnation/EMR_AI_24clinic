@@ -1,38 +1,6 @@
 from typing import List, Dict
 from app import drug_db
 
-# ── [session4] rules_v2 integration ──
-# 아래 import 는 세션 4 신규 rule (BST / 소아 제형 용량) 사용.
-# 실패 시 신규 rule 만 비활성화되고 legacy rule 은 그대로 동작.
-import logging as _s4_logging
-
-try:
-    from app.rules_v2.bst import check_bst_rules as _s4_check_bst_rules
-    from app.rules_v2.pediatric_dose import (
-        check_pediatric_formulation_dose as _s4_check_pediatric_formulation_dose,
-        load_pediatric_drug_list as _s4_load_pediatric_drug_list,
-    )
-    _S4_RULES_AVAILABLE = True
-except Exception as _e:   # pragma: no cover
-    _S4_RULES_AVAILABLE = False
-    _s4_logging.getLogger(__name__).warning(
-        "[checker] rules_v2 import 실패. 신규 rule 비활성화. err=%s", _e,
-    )
-
-# 모듈 로드 시 1회 curated list 캐시.
-_S4_PEDIATRIC_DRUG_LIST = None
-if _S4_RULES_AVAILABLE:
-    try:
-        _S4_PEDIATRIC_DRUG_LIST = _s4_load_pediatric_drug_list()
-    except Exception as _e:   # pragma: no cover
-        _s4_logging.getLogger(__name__).warning(
-            "[checker] pediatric drug list 로드 실패. 소아 rule skip. err=%s", _e,
-        )
-
-# vitals_context 미연결 로그를 1회만 남기기 위한 플래그.
-_S4_LEGACY_WARNED = False
-
-
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 상수: drug_db에서 동적으로 가져옴
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1352,7 +1320,7 @@ def _check_dosage(dx_set: set, order_set: set, order_map: Dict[str, dict],
 
 
 def run_check(dx: List[str], orders: List[str], symptoms: str, patient_type: str,
-              order_details: list = None, age: int = None, vitals_context=None, patient_context=None) -> List[Dict]:
+              order_details: list = None, age: int = None) -> List[Dict]:
     dx_set = {c.lower().strip() for c in dx}
     order_set = {c.lower().strip() for c in orders}
     order_map = _build_order_map(order_details)
@@ -1368,32 +1336,5 @@ def run_check(dx: List[str], orders: List[str], symptoms: str, patient_type: str
 
     if not results:
         _append(results, "ok", "체크 항목 이상 없음")
-
-
-    # ── [session4] rules_v2 호출 ──
-    if _S4_RULES_AVAILABLE:
-        # BST 양방향 rule. vitals_context 미연결이면 내부에서 skip.
-        if vitals_context is None:
-            global _S4_LEGACY_WARNED
-            if not _S4_LEGACY_WARNED:
-                _s4_logging.getLogger(__name__).info(
-                    "[checker] vitals_context 미연결 (legacy pipeline). BST rule skip."
-                )
-                _S4_LEGACY_WARNED = True
-        else:
-            results.extend(_s4_check_bst_rules(vitals_context, order_set))
-
-        # 소아 제형 용량 rule. curated list 없으면 내부에서 skip.
-        if _S4_PEDIATRIC_DRUG_LIST:
-            _pc = patient_context or {}
-            results.extend(_s4_check_pediatric_formulation_dose(
-                orders=order_set,
-                order_details=order_details,
-                age_minor=_pc.get("age_minor") if isinstance(_pc, dict) else None,
-                age_years=age,
-                patient_type=patient_type,
-                vitals_context=vitals_context,
-                drug_list=_S4_PEDIATRIC_DRUG_LIST,
-            ))
 
     return results
