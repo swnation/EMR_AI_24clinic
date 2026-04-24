@@ -1,197 +1,41 @@
 {
-  "version": "0.3",
-  "scope": "URI(상기도감염) + 주사/수액 + 독감 + 공통 안전",
-  "source": "인수인계_2026년3월.md + 성인URI + 소아URI + 청소년URI + 알약먹는소아URI + 독감influenza + 소아독감",
-  "note": "심평원 진해거담제 분류: suda/suda2는 카운팅 제외",
+  "version": "1.0",
+  "schema": "v3-rule-result",
+  "migrated_from": "0.3",
+  "migrated_at": "2026-04-25",
+  "migrated_by_session": 5,
+  "decision_doc": "rules-v03-reclassification-final",
+  "scope": "v1 safety + clinical_policy rules only. 청구 rule 은 archive 참조.",
   "rules": [
     {
-      "id": "adult_antitussive_over2",
-      "name": "성인 진해거담제 2종 초과",
-      "patient_type": "성인",
-      "level": "err",
-      "message": "성인 진해거담제 2종까지만 보험",
-      "sub": "co/cosy(cough) + erdo/ac/drop(sputum) 중 2종까지. suda 제외",
-      "source": "인수인계_2026년3월.md"
+      "rule_id": "ped-iv-ban",
+      "purpose": "clinical_policy",
+      "severity": "warn",
+      "trigger": "patient-context+order",
+      "fallback_if_uncertain": "unknown",
+      "message": "만 12세 미만 소아 IV 수액은 원내 원칙상 제한",
+      "sub": "의학적 절대 금기가 아니라 24시열린의원 원내 운영 규칙. tamiiv(페라미플루 IV)도 IV 수액이므로 동일하게 제한 대상. 예외적 필요 시 진료의가 혈관 상태, 협조도, 임상 필요성을 확인 후 결정.",
+      "source": "rules.json v0.3 ped_iv_ban + 2026-04-25 붕쌤 정정"
     },
     {
-      "id": "adult_sputum_dup",
-      "name": "성인 거담제(sputum) 중복",
-      "patient_type": "성인",
-      "trigger_orders_all": ["erdo/ac/drop 중 2종 이상"],
-      "level": "err",
-      "message": "같은 분류(거담/sputum) 약물 중복 → 삭감",
-      "sub": "erdo, ac, drop 중 2종 이상 병용 시 하나는 f12 비급여 처리",
-      "source": "인수인계_2026년3월.md"
+      "rule_id": "tamiiv-single-dose",
+      "purpose": "safety",
+      "severity": "info",
+      "trigger": "order-only",
+      "fallback_if_uncertain": "unknown",
+      "message": "tamiiv: 1회 투여로 완료",
+      "sub": "5일 연속 투여 아님.",
+      "source": "rules.json v0.3 tamiiv_info"
     },
     {
-      "id": "ped_antitussive_over",
-      "name": "소아 진해거담제 초과",
-      "patient_type": "소아",
-      "level": "err",
-      "message": "소아 진해거담제: 6세미만 3종, 6세이상 2종까지",
-      "sub": "dropsy/ambsy/umk(cough) + ac2(sputum). suda2 제외",
-      "source": "소아 URI(만12세 미만).md"
-    },
-    {
-      "id": "ac_erdo_required_dx",
-      "name": "ac/erdo 필수 상병",
-      "trigger_orders": ["ac","erdo"],
-      "required_dx_any": ["j040","j0180","j209"],
-      "level": "warn",
-      "message": "ac/erdo → 후두염(j040)/부비동염(j0180)/기관지염(j209) 상병 필요",
-      "sub": "후두염/부비동염 사용 시 연결코드 기관지염 삭제",
-      "source": "인수인계_2026년3월.md"
-    },
-    {
-      "id": "umk_required_dx",
-      "name": "umk 필수 상병",
-      "trigger_orders": ["umk"],
-      "required_dx_any": ["j209"],
-      "level": "warn",
-      "message": "umk(움카민) → j209(기관지염) 상병 필요",
-      "sub": "대부분의 소아 진해거담제가 기관지염에만 보험",
-      "source": "소아 URI(만12세 미만).md"
-    },
-    {
-      "id": "umk_dose",
-      "name": "umk 소아 용량 고정",
-      "trigger_orders": ["umk"],
-      "patient_type": "소아",
-      "level": "warn",
-      "message": "umk 소아 용량 고정 — Kg 무관, 벗어나면 삭감",
-      "sub": "1~6세미만: 총량 9mL TID / 6~12세미만: 총량 18mL TID",
-      "source": "인수인계_2026년3월.md"
-    },
-    {
-      "id": "tan_lower_resp",
-      "name": "tan + 하기도 상병 삭감",
-      "trigger_orders": ["tan"],
-      "banned_dx": ["j22","j209"],
-      "level": "err",
-      "message": "tan(탄툼가글) + 하기도 상병(j22/j209) → 삭감",
-      "sub": "상기도 상병/구내염만 가능. 1달 100ml 한 통만 보험",
-      "source": "인수인계_2026년3월.md"
-    },
-    {
-      "id": "atock_pat_dx",
-      "name": "atock/pat 필수 상병",
-      "trigger_orders": ["atock","atock2","pat1","pat2","pat3"],
-      "required_dx_any": ["j209","j459"],
-      "level": "warn",
-      "message": "atock/pat → j209(기관지염) 또는 j459(천식) 상병 필요",
-      "source": "인수인계_2026년3월.md"
-    },
-    {
-      "id": "loxo_resp",
-      "name": "loxo + 호흡기 상병만",
-      "trigger_orders": ["loxo"],
-      "level": "err",
-      "message": "loxo + 호흡기 상병만 → 삭감",
-      "sub": "m545(아래허리통증) 등 근골격계 상병 추가 필요",
-      "source": "인수인계_2026년3월.md"
-    },
-    {
-      "id": "inj_2types",
-      "name": "주사 2종 이상",
-      "level": "warn",
-      "message": "주사제 2종 이상 → 추가분은 비급여(-b) 코드",
-      "sub": "genta→gentab, dexa→dexab (디클로페낙 제외)",
-      "source": "인수인계_2026년3월.md"
-    },
-    {
-      "id": "dexa_required_dx",
-      "name": "dexa 필수 상병",
-      "trigger_orders": ["dexa"],
-      "required_dx_any": ["j040","j303"],
-      "level": "warn",
-      "message": "dexa(덱사메타손) → j040(후두염) 또는 j303(비염) 상병 필요",
-      "source": "인수인계_2026년3월.md"
-    },
-    {
-      "id": "genta_resp_ban",
-      "name": "genta 단순 호흡기 금지",
-      "trigger_orders": ["genta"],
-      "level": "warn",
-      "message": "genta → 단순 호흡기 질환에 사용하지 않음",
-      "source": "인수인계_2026년3월.md"
-    },
-    {
-      "id": "ped_iv_ban",
-      "name": "소아 수액 금지",
-      "patient_type": "소아",
-      "level": "err",
-      "message": "소아(12세 미만) 수액 처방 불가",
-      "sub": "14~15세 이상부터 혈관상태에 따라 가능. tamiiv는 6개월↑ 가능",
-      "source": "소아 독감 influenza.md"
-    },
-    {
-      "id": "tamiflu_dx",
-      "name": "타미플루 독감 상병",
-      "trigger_orders": ["tami75","tami30","tami45","tamisy","tamiiv"],
-      "required_dx": ["j111-1"],
-      "level": "warn",
-      "message": "타미플루 → j111-1(인플루엔자 NOS) 상병 확인",
-      "sub": "j09-4(신종플루)는 2009년 유행한 것이므로 다름!",
-      "source": "독감 influenza.md"
-    },
-    {
-      "id": "tamiflu_prophylaxis",
-      "name": "타미플루 예방목적 비보험",
-      "trigger_orders": ["tami75","tami30","tami45","tamisy"],
-      "level": "info",
-      "message": "타미플루 예방 QD x10일은 비보험",
-      "sub": "치료: BID x5d(보험) / 예방: QD x10d(f12 비보험, 특정내역 삭제)",
-      "source": "독감 influenza.md"
-    },
-    {
-      "id": "tamiiv_info",
-      "name": "tamiiv(페라미플루) 주의",
-      "trigger_orders": ["tamiiv"],
-      "level": "info",
-      "message": "tamiiv: 1회로 끝남! 5일 연속 아님",
-      "sub": "성인 기본 2앰플. 6개월↑. Kg당 10mL, 1앰플=150mL, 최대 300mL",
-      "source": "독감 influenza.md"
-    },
-    {
-      "id": "dige_banned",
-      "name": "dige 사용 금지",
-      "trigger_orders": ["dige"],
-      "level": "err",
-      "message": "dige 사용 불가 — ranitidine 시장 철수",
-      "sub": "대체: reba(무코란) 또는 ppiiv(판타졸주사)",
-      "source": "인수인계_2026년3월.md"
-    },
-    {
-      "id": "glia8_age",
-      "name": "글리아티린 60세 미만",
-      "trigger_orders": ["glia8"],
-      "level": "warn",
-      "message": "글리아티린(glia8) 60세 미만 금기",
-      "sub": "반드시 전화로 나이 확인 후 처방",
-      "source": "인수인계_2026년3월.md"
-    },
-    {
-      "id": "cd_order",
-      "name": "cd 상병 순서",
-      "trigger_orders": ["cd"],
-      "level": "warn",
-      "message": "cd → 관련 상병이 주상병 최상위에 있어야 함",
-      "sub": "고혈압/당뇨 만성질환 상병을 상병 목록 맨 위로",
-      "source": "인수인계_2026년3월.md"
-    },
-    {
-      "id": "z_code_primary",
-      "name": "Z코드 주상병",
-      "level": "warn",
-      "message": "주상병이 배제코드(Z코드) → 순서 변경 필요",
-      "source": "인수인계_2026년3월.md"
-    },
-    {
-      "id": "antibiotics_no_dx",
-      "name": "항생제 상병 누락",
-      "level": "warn",
-      "message": "항생제 처방 있는데 상병코드 없음",
-      "source": "인수인계_2026년3월.md"
+      "rule_id": "dige-market-withdrawn",
+      "purpose": "safety",
+      "severity": "warn",
+      "trigger": "order-only",
+      "fallback_if_uncertain": "unknown",
+      "message": "dige 처방 불가 — ranitidine 국내 시장 철수",
+      "sub": "대체: reba(무코란) 또는 ppiiv(판타졸주사). 시장 재승인 시 rule unpublish.",
+      "source": "rules.json v0.3 dige_banned (2020년 NDMA 이슈 이후 철수)"
     }
   ]
 }
