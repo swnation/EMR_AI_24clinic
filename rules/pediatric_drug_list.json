@@ -1,0 +1,363 @@
+{
+  "version": "0.1",
+  "updated": "2026-04-24",
+  "source_documents": [
+    "uploads/소아_약_용량_표.docx",
+    "uploads/소아_약_정리.pptx",
+    "knowledge/소아 URI(만12세 미만).md",
+    "인수인계_2026년3월.md",
+    "식약처 제품 설명서 (tysy / dexisy 스크린샷)",
+    "대화 2026-04-24: 붕쌤 원내 원칙 구두 정정"
+  ],
+  "scope": "Rule-Pediatric-Formulation-Dose (v3 §8.5.1) 가 참조하는 체중/나이 기반 확인 대상 약 curated list.",
+  "usage_contract": {
+    "on_empty_list": "rule 전체 비활성화 (fail-silent-skip). 오탐 폭증 방지.",
+    "on_drug_not_in_list": "해당 약에 대해 rule 발동 안 함.",
+    "on_drug_with_needs_review_true": "용량 상세가 아직 미확정. rule 은 '체중 기반 확인 대상' info 만 반환. 실제 용량 비교는 수행 안 함.",
+    "dosing_rule_types": {
+      "weight_bracket_fixed": "체중 구간별 1회 용량 고정. per_dose 추출 가능.",
+      "age_bracket_fixed":    "age_minor 구간별 1일 총량 고정. daily_total 고정 비교.",
+      "per_kg_per_dose":      "1회 용량 = 체중 × factor."
+    }
+  },
+  "clinic_policy": {
+    "tysy_dexisy_matching_rule": "체중 범위의 하한값과 1회 권장용량의 최소값을 매칭. TID 기준 1일 총량 산출.",
+    "augsy_hospital_cap_ml": 30,
+    "augsy_hospital_cap_note": "원내 관행. 넘어가면 '알약 고려' 메시지. 의학적 금기는 아님 (의학적 절대 상한은 amoxicillin 90 mg/kg/day, medical_max_mg_per_kg_per_day 필드로 분리).",
+    "tykid_discontinued": true,
+    "tykid_replaced_by": "ty325",
+    "tykid_note": "AAP 알약 325mg. 12세 미만 분할 복용 가능. curated list 항목 tykid 는 deprecated."
+  },
+  "drugs": {
+    "tysy": {
+      "name": "세토펜현탁액",
+      "ingredient": "acetaminophen",
+      "formulation": "syrup",
+      "concentration_mg_per_ml": 32.0,
+      "unit": "mL",
+      "typical_freq_per_day": 3,
+      "dosing_rule_type": "weight_bracket_fixed",
+      "weight_brackets": [
+        {"weight_kg_min": 7,  "weight_kg_max": 7.9,  "per_dose_ml": 2.5,  "age_hint": "4~6개월"},
+        {"weight_kg_min": 8,  "weight_kg_max": 11.9, "per_dose_ml": 3.5,  "age_hint": "7~23개월"},
+        {"weight_kg_min": 12, "weight_kg_max": 15.9, "per_dose_ml": 5.0,  "age_hint": "2~3세"},
+        {"weight_kg_min": 16, "weight_kg_max": 22.9, "per_dose_ml": 7.5,  "age_hint": "4~6세"},
+        {"weight_kg_min": 23, "weight_kg_max": 29.9, "per_dose_ml": 10.0, "age_hint": "7~8세"},
+        {"weight_kg_min": 30, "weight_kg_max": 37.9, "per_dose_ml": 12.5, "age_hint": "9~10세"},
+        {"weight_kg_min": 38, "weight_kg_max": 42.9, "per_dose_ml": 15.0, "age_hint": "11세"},
+        {"weight_kg_min": 43, "weight_kg_max": null, "per_dose_ml": 20.0, "age_hint": "12세+"}
+      ],
+      "tolerance_pct": 15,
+      "medical_max_mg_per_kg_per_day": 75,
+      "medical_max_note": "1일 5회(75 mg/kg) 초과 금지. 식약처 설명서.",
+      "alternative_if_over_30kg": "ty325 (AAP 325mg 알약)",
+      "note": "원내 원칙: 체중 구간 하한값 매칭, TID. dexisy 와 병용 시 용량 맞춤(보호자 편의).",
+      "needs_review": false
+    },
+    "dexisy": {
+      "name": "코코페디시럽",
+      "ingredient": "dexibuprofen",
+      "formulation": "syrup",
+      "concentration_mg_per_ml": 12.0,
+      "unit": "mL",
+      "typical_freq_per_day": 3,
+      "dosing_rule_type": "weight_bracket_fixed",
+      "weight_brackets": [
+        {"weight_kg_min": 7.9,  "weight_kg_max": 9.9,  "per_dose_ml": 3.0,  "age_hint": "6~11개월"},
+        {"weight_kg_min": 10.0, "weight_kg_max": 11.9, "per_dose_ml": 4.0,  "age_hint": "12~23개월"},
+        {"weight_kg_min": 12.0, "weight_kg_max": 15.9, "per_dose_ml": 5.0,  "age_hint": "2~3세"},
+        {"weight_kg_min": 16.0, "weight_kg_max": 20.9, "per_dose_ml": 7.0,  "age_hint": "4~5세"},
+        {"weight_kg_min": 21.0, "weight_kg_max": 29.9, "per_dose_ml": 9.0,  "age_hint": "6~8세"},
+        {"weight_kg_min": 30.0, "weight_kg_max": 37.9, "per_dose_ml": 12.5, "age_hint": "9~10세"},
+        {"weight_kg_min": 38.0, "weight_kg_max": 42.9, "per_dose_ml": 16.0, "age_hint": "11세"},
+        {"weight_kg_min": 43.0, "weight_kg_max": null, "per_dose_ml": 18.0, "age_hint": "12세+"}
+      ],
+      "tolerance_pct": 15,
+      "medical_max_mg_per_kg_per_day": 28,
+      "medical_max_note": "1일 4회(28 mg/kg) 초과 금지. 식약처 설명서.",
+      "contraindication_dx": ["K29", "K52"],
+      "contraindication_dx_note": "위염/장염 상병 시 r51(두통) 또는 r509-2(발열) 상병 없으면 삭감 (pptx 메모). 별도 rule 후보.",
+      "note": "원내 원칙: 체중 구간 하한값 + 1회 용량 최소값 매칭, TID. tysy 와 병용 시 용량 맞춤.",
+      "needs_review": false
+    },
+    "augsy": {
+      "name": "하이크라듀오시럽",
+      "ingredient": "amoxicillin-clavulanate",
+      "formulation": "syrup",
+      "concentration_mg_per_ml": 40.0,
+      "clavulanate_concentration_mg_per_ml": 5.7,
+      "concentration_note": "아목시실린 40 mg/mL, 클라불란산 5.7 mg/mL (붕쌤 확인 2026-04-24). 총 1병 아목시실린 20g/클라불란산 2.85g.",
+      "unit": "mL",
+      "typical_freq_per_day": 3,
+      "dosing_rule_type": "hospital_daily_cap_only",
+      "hospital_recommended_daily_max_ml": 30,
+      "hospital_cap_note": "원내 관행. 넘으면 '알약 고려' info. 의학적 금기는 아님.",
+      "medical_max_mg_per_kg_per_day": 90,
+      "medical_max_note": "amoxicillin 기준 고용량 AOM 가이드라인 상한. (40-50 표준, 80-90 high-dose AOM.) 농도 40 mg/mL 이므로 체중 15kg 아이는 33.75 mL/day 넘으면 90 mg/kg/day 초과.",
+      "alternative_if_over_hospital_cap": "aug (알약, 30kg 이상 권장)",
+      "pediatric_tablet_threshold_kg": 30,
+      "age_min_for_tablet": "12세 이상 또는 40kg 이상 (아목시실린-클라불란산 정제).",
+      "note": "원내 30mL/day 초과 → info (알약 고려). 체중 소아에 대해 amox 90 mg/kg/day 초과 → warn (의학적 금기).",
+      "needs_review": false
+    },
+    "umk": {
+      "name": "펠리움시럽 (움카민)",
+      "ingredient": "pelargonium sidoides extract",
+      "formulation": "syrup",
+      "unit": "mL",
+      "typical_freq_per_day": 3,
+      "dosing_rule_type": "age_bracket_fixed",
+      "age_brackets": {
+        "6개월~1세": {"daily_total_ml": 9,  "per_dose_ml": 3},
+        "1~2세":    {"daily_total_ml": 9,  "per_dose_ml": 3},
+        "2~6세":    {"daily_total_ml": 9,  "per_dose_ml": 3},
+        "6~9세":    {"daily_total_ml": 18, "per_dose_ml": 6},
+        "9~10세":   {"daily_total_ml": 18, "per_dose_ml": 6},
+        "10~12세":  {"daily_total_ml": 18, "per_dose_ml": 6}
+      },
+      "tolerance_pct": 0,
+      "required_dx_any": ["J209"],
+      "note": "나이별 고정 용량. 벗어나면 삭감. 기관지염 상병(J209) 필요.",
+      "source_precedence": "knowledge/소아 URI(만12세 미만).md 원문",
+      "needs_review": false
+    },
+    "di": {
+      "name": "디클로페낙 주사 (비보험 코드)",
+      "ingredient": "diclofenac",
+      "formulation": "injection",
+      "unit": "cc",
+      "typical_freq_per_day": 1,
+      "dosing_rule_type": "weight_bracket_fixed",
+      "weight_brackets": [
+        {"weight_kg_min": 0,  "weight_kg_max": 12,   "per_dose_ml": 0.2},
+        {"weight_kg_min": 13, "weight_kg_max": 15,   "per_dose_ml": 0.25},
+        {"weight_kg_min": 16, "weight_kg_max": 24,   "per_dose_ml": 0.33},
+        {"weight_kg_min": 25, "weight_kg_max": 35,   "per_dose_ml": 0.5},
+        {"weight_kg_min": 36, "weight_kg_max": null, "per_dose_ml": 1.0,
+         "note": "성인 50Kg=1cc 기준. 체중 비례."}
+      ],
+      "tolerance_pct": 10,
+      "ampule_volume_ml": 2,
+      "age_min": "5세 미만 (d 는 5세 이상)",
+      "note": "비보험 코드. 1앰플 2cc.",
+      "needs_review": false
+    },
+    "d": {
+      "name": "디클로페낙 주사 (기타근통 코드)",
+      "ingredient": "diclofenac",
+      "formulation": "injection",
+      "unit": "cc",
+      "typical_freq_per_day": 1,
+      "dosing_rule_type": "weight_bracket_fixed",
+      "weight_brackets": [
+        {"weight_kg_min": 13, "weight_kg_max": 15,   "per_dose_ml": 0.25},
+        {"weight_kg_min": 16, "weight_kg_max": 24,   "per_dose_ml": 0.33},
+        {"weight_kg_min": 25, "weight_kg_max": 35,   "per_dose_ml": 0.5},
+        {"weight_kg_min": 36, "weight_kg_max": null, "per_dose_ml": 1.0}
+      ],
+      "tolerance_pct": 10,
+      "ampule_volume_ml": 2,
+      "age_min": "5세 이상. 몸이 아프다고 의사표현 가능한 나이부터.",
+      "note": "기타근통 코드 동반. 용량은 di 와 동일 체중 구간.",
+      "needs_review": false
+    },
+
+    "_comment_placeholders": "이하는 붕쌤이 '더 넓게' 요청하여 등록. 용량 해석 모호 → needs_review=true. rule 은 '체중 기반 확인 대상' info 만 반환.",
+
+    "suda2": {
+      "name": "코비안에스시럽",
+      "ingredient": "phenylephrine+pheniramine",
+      "formulation": "syrup",
+      "unit": "mL",
+      "typical_freq_per_day": 3,
+      "dosing_rule_type": "needs_review",
+      "raw_docx_note": "Kg보다 약간 아래 3의 배수, co2와 같은 용량. 한도 30.",
+      "interpretation_draft": "1회 = 체중(kg)에 가까운 3의 배수 절사. 1일 한도 30mL.",
+      "required_dx_any": ["J303"],
+      "required_dx_note": "비염 1차 (peniramine 병용). 단독 비염에는 인정.",
+      "needs_review": true
+    },
+    "co2": {
+      "name": "(코데날 계열 소아용)",
+      "ingredient": "codeine containing",
+      "formulation": "syrup",
+      "unit": "mL",
+      "dosing_rule_type": "needs_review",
+      "raw_docx_note": "Kg보다 약간 아래 3의 배수. suda2와 같은 용량. 한도 30.",
+      "interpretation_draft": "1회 ≈ 체중(kg) 3의 배수 절사. 1일 한도 30.",
+      "needs_review": true
+    },
+    "sme": {
+      "name": "다이톱현탁액",
+      "ingredient": "smectite",
+      "formulation": "syrup",
+      "unit": "mL",
+      "typical_freq_per_day": 3,
+      "dosing_rule_type": "needs_review",
+      "raw_docx_note": "Kg x 1.5. 10kg-15, 20kg-30, 30kg-45, 40kg-60 (성인). 한도 60.",
+      "interpretation_draft": "1일 총량 = 체중 × 1.5 mL. 한도 60mL/day.",
+      "needs_review": true
+    },
+    "cetisy": {
+      "name": "알레린액",
+      "ingredient": "levocetirizine",
+      "formulation": "syrup",
+      "unit": "mL",
+      "typical_freq_per_day": 2,
+      "dosing_rule_type": "weight_bracket_fixed",
+      "weight_brackets": [
+        {"weight_kg_min": 0,  "weight_kg_max": 9.9,  "per_dose_ml": 4},
+        {"weight_kg_min": 10, "weight_kg_max": 14.9, "per_dose_ml": 5},
+        {"weight_kg_min": 15, "weight_kg_max": 19.9, "per_dose_ml": 6},
+        {"weight_kg_min": 20, "weight_kg_max": 24.9, "per_dose_ml": 8},
+        {"weight_kg_min": 25, "weight_kg_max": 30,   "per_dose_ml": 10}
+      ],
+      "tolerance_pct": 10,
+      "note": "BID 기준. docx 원문 확인.",
+      "needs_review": true,
+      "needs_review_note": "BID 맞는지, 30kg 초과 용량 규정 확인 필요."
+    },
+    "keto2": {
+      "name": "케토티펜 계열",
+      "ingredient": "ketotifen",
+      "formulation": "syrup",
+      "unit": "mL",
+      "typical_freq_per_day": 2,
+      "dosing_rule_type": "weight_bracket_fixed",
+      "weight_brackets": [
+        {"weight_kg_min": 0,  "weight_kg_max": 9.9,  "per_dose_ml": 4},
+        {"weight_kg_min": 10, "weight_kg_max": 14.9, "per_dose_ml": 5},
+        {"weight_kg_min": 15, "weight_kg_max": 19.9, "per_dose_ml": 6},
+        {"weight_kg_min": 20, "weight_kg_max": 24.9, "per_dose_ml": 8},
+        {"weight_kg_min": 25, "weight_kg_max": 30,   "per_dose_ml": 10}
+      ],
+      "tolerance_pct": 10,
+      "needs_review": true,
+      "needs_review_note": "cetisy 와 동일 구간. 성분 확인 필요."
+    },
+    "trimesy": {
+      "name": "포리부틴드라이시럽",
+      "ingredient": "trimebutine",
+      "formulation": "syrup",
+      "unit": "mL",
+      "dosing_rule_type": "needs_review",
+      "raw_docx_note": "Kg. 한도 30.",
+      "interpretation_draft": "1일 총량 = 체중(kg) mL. 한도 30mL/day.",
+      "needs_review": true
+    },
+    "typow": {
+      "name": "세토펜건조시럽",
+      "ingredient": "acetaminophen",
+      "formulation": "granule",
+      "unit": "pack",
+      "dosing_rule_type": "needs_review",
+      "raw_docx_note": "Kg × 0.1 정도. 12세 미만.",
+      "interpretation_draft": "1회 = 체중 × 0.1 포 (가루약).",
+      "age_max": "12세 미만",
+      "medical_max_mg_per_kg_per_day": 75,
+      "note": "tykid 단종 이후 ty325 로 대체 중. typow 은 가루약 계열.",
+      "needs_review": true
+    },
+    "lacto2": {
+      "name": "바실페디산",
+      "ingredient": "bacillus licheniformis",
+      "formulation": "granule",
+      "unit": "pack",
+      "dosing_rule_type": "needs_review",
+      "raw_docx_note": "Kg × 0.1 보다 비슷~위. anti 랑 같이 간다. 한도 3.",
+      "interpretation_draft": "1회 = 체중 × 0.1 포. 한도 3 포 (1회 or 1일 불확실).",
+      "combination_hint": "항생제 병용 (프로바이오틱).",
+      "needs_review": true,
+      "needs_review_note": "한도 3 의 단위(1회 vs 1일) 확인 필요."
+    },
+    "dom2": {
+      "name": "돔페리돈과립",
+      "ingredient": "domperidone",
+      "formulation": "granule",
+      "unit": "pack",
+      "dosing_rule_type": "needs_review",
+      "raw_docx_note": "Kg × 0.1. 한도 3. 가루약 많으면 trimesy 대체.",
+      "interpretation_draft": "1회 = 체중 × 0.1 포. 한도 3 (1회 or 1일 불확실).",
+      "interaction_warning": "퀴놀론 등 병용금기 확인 (QT 연장 위험).",
+      "required_dx_any": ["R11"],
+      "needs_review": true
+    },
+    "ac2": {
+      "name": "(아세틸시스테인 계열 가루약)",
+      "ingredient": "acetylcysteine-like",
+      "formulation": "granule",
+      "unit": "pack",
+      "dosing_rule_type": "needs_review",
+      "raw_docx_note": "Kg × 0.1. 한도 3.",
+      "interpretation_draft": "1회 = 체중 × 0.1 포. 한도 3.",
+      "required_dx_any": ["J040", "J0180", "J209"],
+      "needs_review": true
+    },
+    "chickenpox_syrup": {
+      "name": "지나시드 건조시럽 (수두 물약)",
+      "ingredient": "acyclovir",
+      "formulation": "syrup",
+      "unit": "mL",
+      "typical_freq_per_day": 4,
+      "dosing_rule_type": "per_kg_per_dose",
+      "per_dose_per_kg_ml": 0.25,
+      "per_dose_formula_note": "10kg당 1회 2.5cc = 0.25 mL/kg",
+      "daily_max_ml": 40,
+      "course_days": 5,
+      "needs_review": false
+    },
+    "chickenpox_tablet": {
+      "name": "아시클로버 (수두 알약)",
+      "ingredient": "acyclovir",
+      "formulation": "tablet",
+      "unit": "T",
+      "tablet_mg": 200,
+      "typical_freq_per_day": 4,
+      "dosing_rule_type": "per_kg_per_dose",
+      "per_dose_per_kg_tablets": 0.1,
+      "per_dose_formula_note": "1회 20mg/kg = kg/10 T (1T=200mg)",
+      "per_dose_max_tablets": 4,
+      "daily_max_tablets": 16,
+      "per_dose_max_mg": 800,
+      "daily_max_mg": 3200,
+      "avoid_pow": true,
+      "avoid_pow_note": "가루약 X!! (엄청 씀)",
+      "needs_review": false
+    }
+  },
+  "deprecated": {
+    "tykid": {
+      "reason": "단종/미사용",
+      "replaced_by": "ty325",
+      "replaced_by_note": "ty325 = AAP 325mg 알약. 12세 미만도 분할 복용 가능."
+    }
+  },
+  "followup_new_rules_out_of_scope_for_batch1": {
+    "description": "세션4 Batch 1 에 포함 안 됨. v3 §17 오픈 질문에 기록 후 Batch 2 이상에서 구현.",
+    "candidates": [
+      {
+        "rule_id_draft": "quinolone-pediatric-contraindication",
+        "summary": "Cipro 등 경구 퀴놀론은 18세 미만 금기. eyelevo 등 레보플록사신 점안액은 1세 미만 금기.",
+        "source": "레보록신정 / 레보킹점안액 제품 설명서 (2026-04-24 web search)."
+      },
+      {
+        "rule_id_draft": "pediatric-dexibuprofen-gi-dx",
+        "summary": "dexisy 를 위염/장염 상병에 쓸 때 r51(두통) 또는 r509-2(발열) 없으면 삭감.",
+        "source": "pptx 메모."
+      },
+      {
+        "rule_id_draft": "pediatric-formulation-respiratory-dx",
+        "summary": "dropsy / ambsy / umk / atock2 는 기관지염 (J209) 상병 필요. atock2 는 패치(pat*) 병용금기.",
+        "source": "pptx / knowledge/소아 URI."
+      },
+      {
+        "rule_id_draft": "tysy-dexisy-matching-dose-hint",
+        "summary": "tysy 와 dexisy 가 같이 처방될 때 두 약 용량이 비슷하면 '같은 용량으로 맞추기 권유' info 알림.",
+        "severity_draft": "info",
+        "purpose_draft": "convenience",
+        "note": "강제 아님. 보호자 편의 목적. 붕쌤 2026-04-24 구두 추가. 단독 처방 시에는 각각 기준으로 평가.",
+        "source": "대화 2026-04-24."
+      }
+    ]
+  }
+}
