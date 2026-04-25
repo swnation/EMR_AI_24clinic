@@ -7,7 +7,7 @@ Rules v2 공통 스키마 (v3 §8.4 Rule 기술 공통 형식 구현)
 
 제공:
     - Severity          : info / warn / unknown (v1 에서 hard 는 소아/BST rule 에 미사용)
-    - Purpose           : safety / non_reversible_error / omission / format / history_conflict
+    - Purpose           : safety / non_reversible_error / omission / format / history_conflict / clinical_policy
     - Trigger           : dx-only / order-only / ... / vitals+order / (복합 + 가능)
     - RuleResult        : rule 평가 1건 결과 (dict-like, 기존 checker.py 형식과 호환)
     - make_result()     : RuleResult 생성 헬퍼 (타입/enum 검증 포함)
@@ -46,10 +46,13 @@ PURPOSE_NON_REVERSIBLE_ERROR = "non_reversible_error"
 PURPOSE_OMISSION = "omission"
 PURPOSE_FORMAT = "format"
 PURPOSE_HISTORY_CONFLICT = "history_conflict"
+# session5: rules.json v1 마이그레이션에서 ped-iv-ban 등 원내 운영 규칙용으로 추가.
+PURPOSE_CLINICAL_POLICY = "clinical_policy"
 
 _VALID_PURPOSE = {
     PURPOSE_SAFETY, PURPOSE_NON_REVERSIBLE_ERROR,
     PURPOSE_OMISSION, PURPOSE_FORMAT, PURPOSE_HISTORY_CONFLICT,
+    PURPOSE_CLINICAL_POLICY,
 }
 
 
@@ -294,6 +297,17 @@ if __name__ == "__main__":
     assert r["matched_code"] == "umk"
     assert r["dose_given"] == 25.0
     print("[OK] extra merge")
+
+    # clinical_policy purpose (session5: ped-iv-ban 용)
+    r = make_result(
+        rule_id="ped-iv-ban",
+        purpose=PURPOSE_CLINICAL_POLICY,
+        severity=SEVERITY_WARN,
+        trigger="patient-context+order",
+        message="만 12세 미만 소아 IV 수액은 원내 원칙상 제한",
+    )
+    assert r["purpose"] == "clinical_policy"
+    print("[OK] clinical_policy purpose")
 
     # ── 실패 케이스 ──
     try:

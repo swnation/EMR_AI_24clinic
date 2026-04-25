@@ -27,6 +27,7 @@ from app.rules_v2.pediatric_dose import (
     load_pediatric_drug_list,
 )
 from app.rules_v2.schema import (
+    PURPOSE_CLINICAL_POLICY,
     PURPOSE_NON_REVERSIBLE_ERROR,
     PURPOSE_OMISSION,
     PURPOSE_SAFETY,
@@ -154,6 +155,20 @@ class TestSchema:
             message="m", source="s",
         )
         assert r["trigger"] == "patient-context+vitals+order"
+
+    def test_clinical_policy_purpose_accepted(self):
+        # session5: rules.json v1 의 ped-iv-ban 등 원내 운영 규칙 카테고리.
+        r = make_result(
+            rule_id="ped-iv-ban",
+            purpose=PURPOSE_CLINICAL_POLICY,
+            severity=SEVERITY_WARN,
+            trigger="patient-context+order",
+            message="만 12세 미만 소아 IV 수액은 원내 원칙상 제한",
+            source="rules.json v0.3 ped_iv_ban + 2026-04-25 붕쌤 정정",
+        )
+        assert r["purpose"] == "clinical_policy"
+        assert r["severity"] == "warn"
+        assert r["level"] == "warn"
 
 
 # ───────────────────────── age_utils ─────────────────────────

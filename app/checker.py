@@ -482,16 +482,22 @@ def _check_injection(dx_set: set, order_set: set, patient_type: str, results: li
                 "source": "인수인계_2026년3월.md"
             })
 
-    # C-4. 소아 수액(IV) 금지
+    # C-4. 소아 IV 수액 제한 (clinical_policy)
+    # session5: tamiiv/tyiv 예외 제거. 모든 IV 수액 동일 적용.
+    # 의학적 절대 금기가 아니라 24시열린의원 원내 운영 규칙.
     if patient_type == "소아":
-        # tamiiv는 소아에서도 6개월 이상 가능 (별도 주의)
-        iv_no_tami = (order_set & IV_FLUID_CODES) - {"tamiiv","tyiv"}
-        if iv_no_tami:
+        iv_orders = order_set & IV_FLUID_CODES
+        if iv_orders:
             results.append({
-                "level": "err",
-                "message": "소아(12세 미만) 수액 처방 불가",
-                "sub": f"수액코드: {', '.join(sorted(iv_no_tami))}. 14~15세 이상부터 혈관상태에 따라 가능",
-                "source": "소아 독감 influenza.md"
+                "level": "warn",
+                "message": "만 12세 미만 소아 IV 수액은 원내 원칙상 제한",
+                "sub": (
+                    f"수액코드: {', '.join(sorted(iv_orders))}. "
+                    "의학적 절대 금기가 아니라 24시열린의원 원내 운영 규칙. "
+                    "tamiiv, tyiv 포함 모든 IV 수액이 동일하게 제한 대상. "
+                    "예외적 필요 시 진료의가 혈관 상태, 협조도, 임상 필요성을 확인 후 결정."
+                ),
+                "source": "rules.json v0.3 ped_iv_ban + 2026-04-25 붕쌤 정정"
             })
 
 
@@ -520,13 +526,14 @@ def _check_flu(dx_set: set, order_set: set, results: list):
                 "source": "독감 influenza.md"
             })
 
-        # D-3. tamiiv(페라미플루) 주의사항
+        # D-3. tamiiv(페라미플루) 단일 투여 안내 (safety/info)
+        # session5: 문구 단순화. 체중 기반 용량 검증은 Batch 2 이후로 분리.
         if "tamiiv" in order_set:
             results.append({
                 "level": "info",
-                "message": "tamiiv(페라미플루): 1회로 끝남, 5일 연속 아님",
-                "sub": "성인 기본 2앰플. 6개월↑ 사용 가능. Kg당 10mL, 1앰플=150mL, 최대 300mL",
-                "source": "독감 influenza.md"
+                "message": "tamiiv: 1회 투여로 완료",
+                "sub": "5일 연속 투여 아님.",
+                "source": "rules.json v0.3 tamiiv_info"
             })
 
 
@@ -535,13 +542,14 @@ def _check_flu(dx_set: set, order_set: set, results: list):
 # [E] 공통 안전 룰
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 def _check_common(dx_set: set, order_set: set, dx: list, patient_type: str, results: list):
-    # E-1. dige(ranitidine) 사용 금지
+    # E-1. dige(ranitidine) 시장 철수 (safety/warn)
+    # session5: 문구 정리. 시장 재승인 시 rule unpublish 안내 추가.
     if "dige" in order_set:
         results.append({
-            "level": "err",
-            "message": "dige 사용 불가 — ranitidine 성분 시장 철수",
-            "sub": "대체: reba(무코란) 또는 ppiiv(판타졸주사)",
-            "source": "인수인계_2026년3월.md"
+            "level": "warn",
+            "message": "dige 처방 불가 — ranitidine 국내 시장 철수",
+            "sub": "대체: reba(무코란) 또는 ppiiv(판타졸주사). 시장 재승인 시 rule unpublish.",
+            "source": "rules.json v0.3 dige_banned (2020년 NDMA 이슈 이후 철수)"
         })
 
     # E-2. 글리아티린 60세 미만
