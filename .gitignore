@@ -1,2 +1,12 @@
 __pycache__/
 *.bak.session5
+
+# Session 6 P1 (added by patch_c1.py)
+*.bak
+*.bak.*
+*.bak_*
+사본.py
+*사본.py
+ocr/regions.json
+ocr/forbidden_regions.json
+ocr/forbidden_violations.log
