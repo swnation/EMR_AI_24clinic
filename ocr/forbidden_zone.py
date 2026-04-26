@@ -284,12 +284,17 @@ def init_placeholder(path=FORBIDDEN_PATH, overwrite=False):
     진료실 PC 에서 각 필드의 bbox 를 실측한 뒤 `x1,y1,x2,y2` 값을 채우고
     `_placeholder: true` 를 제거하면 활성화된다.
 
-    실측 대상 필드 (의사랑 하단 PHI strip 기준):
-        - patient_name      이름
-        - patient_rrn       주민등록번호
-        - insurance_id      보험번호
-        - phone             전화번호
-        - (옵션) 하단 strip 좌측/중앙 통째 bbox
+    실측 대상 필드 (의사랑 하단 PHI strip 기준, 화면 순서):
+        - patient_no       환자번호 (의사랑 내부 ID)
+        - patient_name     이름
+        - patient_rrn      주민번호
+        - insurance_type   보험종류
+        - insurance_id     보험번호
+        - guardian_name    보호자 이름
+
+    제외:
+        - phone (휴대폰): 의사랑 화면에 표시되지 않음
+        - sex / age: capture 허용 (patient_context 영역)
     """
     if os.path.exists(path) and not overwrite:
         raise FileExistsError(f"{path} 이미 존재. overwrite=True 로 재생성 가능.")
@@ -301,14 +306,18 @@ def init_placeholder(path=FORBIDDEN_PATH, overwrite=False):
             "진료실 PC 에서 의사랑 하단 PHI strip 의 각 필드 bbox 를 실측한 뒤 값을 채우고 "
             "_status 를 'active' 로, 각 필드의 _placeholder 를 false 또는 제거할 것."
         ),
-        "patient_name":  {"x1": 0, "y1": 0, "x2": 0, "y2": 0, "_placeholder": True,
-                          "_desc": "환자 이름 칸"},
-        "patient_rrn":   {"x1": 0, "y1": 0, "x2": 0, "y2": 0, "_placeholder": True,
-                          "_desc": "주민등록번호 칸"},
-        "insurance_id":  {"x1": 0, "y1": 0, "x2": 0, "y2": 0, "_placeholder": True,
-                          "_desc": "보험번호 칸"},
-        "phone":         {"x1": 0, "y1": 0, "x2": 0, "y2": 0, "_placeholder": True,
-                          "_desc": "전화번호 칸"},
+        "patient_no":     {"x1": 0, "y1": 0, "x2": 0, "y2": 0, "_placeholder": True,
+                           "_desc": "환자번호 (의사랑 내부 ID)"},
+        "patient_name":   {"x1": 0, "y1": 0, "x2": 0, "y2": 0, "_placeholder": True,
+                           "_desc": "환자 이름"},
+        "patient_rrn":    {"x1": 0, "y1": 0, "x2": 0, "y2": 0, "_placeholder": True,
+                           "_desc": "주민등록번호"},
+        "insurance_type": {"x1": 0, "y1": 0, "x2": 0, "y2": 0, "_placeholder": True,
+                           "_desc": "보험종류"},
+        "insurance_id":   {"x1": 0, "y1": 0, "x2": 0, "y2": 0, "_placeholder": True,
+                           "_desc": "보험번호"},
+        "guardian_name":  {"x1": 0, "y1": 0, "x2": 0, "y2": 0, "_placeholder": True,
+                           "_desc": "보호자 이름"},
     }
     with open(path, "w", encoding="utf-8") as f:
         json.dump(placeholder, f, indent=2, ensure_ascii=False)
